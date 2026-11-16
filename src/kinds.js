@@ -13,6 +13,7 @@ export const KIND = Object.freeze({
   RELEASE: 7796, // a published round of group results
   OFFER: 7797, // a signed public offer (job, sale, tender), possibly derived from a public ad
   ACK: 7798, // delivery acknowledgement
+  KNOCK: 7799, // typed first contact from someone the recipient may not know
 });
 
 export const SCHEMA_BASE = 'https://github.com/sellisrev/synallagma/blob/main/schemas/';

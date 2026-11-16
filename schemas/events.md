@@ -13,3 +13,4 @@ All objects travel as Nostr NIP-01 events. Kinds are provisional (see `src/kinds
 | 7796 | RELEASE | collector | | `release.json` |
 | 7797 | OFFER | company, or whoever derived it | `type`, `source`, optional `t` role, `g` region, `expiration` | `offer.json` |
 | 7798 | ACK | recipient | `e` acknowledged event | empty |
+| 7799 | KNOCK | sender | `category`, optional `p` recipient | `knock.json`: category, its fields, a note of at most 280 characters with no links, contacts or handles |
