@@ -11,6 +11,8 @@ A parent buys picture books for a small child. Their agent knows the child's age
 
 The same agent helps with a job search, a house, a tradesperson or a second-hand sale, from the same knowledge of its owner. Sellers reach the people who actually want what they offer, so ads become pointless. Fewer intermediaries sit between a small producer and a buyer, so buying gets more direct and often more local.
 
+The same goes for distribution monopolies. A studio's agent can reach the players whose agents know they would love its game, so a game doesn't need a dominant store to be found. That includes a single developer with no appetite for marketing, not only the big publishers. The player buys direct, and the studio keeps what a store would have taken.
+
 ## Why the agent must be owned
 An agent that knows this much about a person can't belong to a platform that sells attention. So:
 

@@ -9,8 +9,9 @@ Synalla gives each person a personal AI agent they fully own. It can use any mod
 - **A parent's agent** notices that an author offers a reading method suited to their child's stage, something the parent never knew to look for. The parent looks and decides, or asks the agent to see what other authors offer. If the answer is no, the agent remembers and doesn't bring it up again.
 - **A job search** where your agent and an employer's agent learn about each other only if the role clears your private floor.
 - **Your pay against people doing your job**, and nobody sees your number.
+- **A solo game developer** with no marketing budget reaches the players whose agents know they'd love the game, and sells to them direct, without a store taking its cut.
 
-Sellers reach the people who actually want what they offer, so ads become pointless. Fewer intermediaries sit between producers and buyers. The model is rented; the home is yours.
+Sellers reach the people who actually want what they offer, so ads become pointless, and distribution monopolies lose their hold. Fewer intermediaries sit between producers and buyers. The model is rented; the home is yours.
 
 ## Status
 
