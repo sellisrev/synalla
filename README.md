@@ -23,6 +23,8 @@ Early. This repository holds the rules that don't depend on any one host or tran
 | `src/trust.js` | Admission tiers for first contacts, decided by code before any model reads anything |
 | `src/pool.js` | Group answers that unlock at a threshold, with rounds and a differencing check |
 | `src/offers.js` | Signed offers and private judging against the owner's limits |
+| `src/knock.js`, `src/gate.js` | Typed first contact, and the home's gate that routes it by tier, category and daily limits |
+| `src/seal.js` | Sealed mail: NIP-44 v2 encryption and NIP-59 gift wrap, checked against the official test vectors |
 
 Nothing here publishes to public relays or handles real data. See [docs/limits.md](docs/limits.md).
 

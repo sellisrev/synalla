@@ -6,3 +6,4 @@ export * from './pool.js';
 export * from './offers.js';
 export * from './knock.js';
 export * from './gate.js';
+export * from './seal.js';
