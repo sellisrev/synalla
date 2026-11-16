@@ -9,3 +9,4 @@ export * from './gate.js';
 export * from './seal.js';
 export * from './circle.js';
 export * from './inbox.js';
+export * from './decisions.js';
