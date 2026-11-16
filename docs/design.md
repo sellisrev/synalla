@@ -1,26 +1,45 @@
 # Design
 
-Synalla is a network of personal and company agents that exchange small amounts of private information and act only when interests align. It aims at deals that no platform or single AI can make, because the facts needed are spread across people who wouldn't reveal them first.
+Synalla gives every person their own AI agent, which they own outright and which runs on their side. It uses any model provider for the reasoning, but its memory and its knowledge of its owner stay with the owner. Over time it builds a picture of who its owner is, for its owner only, and uses it to find what they want, whether they asked for it or not. It does that by talking with the agents of other people, authors, producers, employers and companies.
 
-## The test for a use case
-The value depends on private facts held by two or more parties, and at least one of them wouldn't publish those facts or hand them to a platform. If one agent with one person's data could do it, it doesn't need a network.
+## What that looks like
+A parent buys picture books for a small child. Their agent knows the child's age and what they've been reading. It notices that an author offers a reading method suited to that stage, which the parent had never heard of and would never have searched for. The agent shows the match, and the parent decides:
 
-## Four kinds of deal
+- **Yes.** They look at it, and perhaps buy it.
+- **Look wider.** The agent asks other authors' and publishers' agents what they offer for the same need, compares, and comes back with the best options, or with nothing worth their time.
+- **No.** The agent remembers, for a long time, and turns down similar matches without the parent having to say it again.
+
+The same agent helps with a job search, a house, a tradesperson or a second-hand sale, from the same knowledge of its owner. Sellers reach the people who actually want what they offer, so ads become pointless. Fewer intermediaries sit between a small producer and a buyer, so buying gets more direct and often more local.
+
+## Why the agent must be owned
+An agent that knows this much about a person can't belong to a platform that sells attention. So:
+
+- **Memory and keys stay with the owner.** The model is rented and can be swapped. The home, meaning memory, profile, limits and decisions, is the owner's own.
+- **Nothing about the owner leaves without a reason.** Other agents get the least that a match needs: a need described in general terms, a price band, or a yes or no from a private comparison.
+- **The owner decides.** The agent finds, compares and drafts. It acts only within limits the owner set.
+
+## What the network adds
+Some matches need only the owner's agent and a public offer. Others are impossible unless several agents hold private facts and compare them without revealing them:
+
 | Kind | Example |
 |---|---|
+| **An offer meets an unspoken need** | The reading method above: the parent's knowledge of the child stays at home, and the author's offer comes to it |
+| **Asking around without being exposed** | "Who offers X for my situation?" sent under a throwaway key, generalised so it doesn't identify the owner |
 | **A group answer without exposure** | Your pay against people doing your job, and nobody sees your number |
 | **Only if you do too** | Quietly open to moving, and a company quietly hiring for that profile; each learns of the other only if both match |
 | **Only if enough of us do** | Eight tenants report the same problem; nothing is revealed until an agreed number have |
 | **Swaps money can't settle** | Chains of people who each want what the next one has: housing, school places, postings |
 
 ## Principles
-1. **The person owns the home.** Keys, profile, limits, queue and decision log live in plain files on their machine.
-2. **The address is a public key no server controls.** Mailboxes are replaceable and listed in a signed record.
-3. **No required operator.** Every always-on role (relay, aggregator, bridge) can be run by several independent parties, and none can read what it holds.
-4. **Rules, not models, hold limits.** Private values are compared by protocols and deterministic code. The model interprets and drafts.
-5. **A session that reads strangers' text can't send or change memory.** Only the owner, or a rule the owner signed, sends.
-6. **Any host.** Claude, OpenCode, ChatGPT, a local model or an agent runtime can drive the home.
-7. **Small, extensible format.** A message is a signed event whose type names a public schema.
+1. **The person owns the home.** Keys, memory, profile, limits, queue and decision log live in plain files on their machine.
+2. **Any model, same memory.** The reasoning model can change without the agent forgetting anything about its owner.
+3. **Decisions are remembered.** A "no" stands for a long time and covers similar offers, so the owner never repeats themselves.
+4. **The address is a public key no server controls.** Mailboxes are replaceable and listed in a signed record.
+5. **No required operator.** Every always-on role (relay, aggregator, bridge) can be run by several independent parties, and none can read what it holds.
+6. **Rules, not models, hold limits.** Private values are compared by protocols and deterministic code. The model interprets and drafts.
+7. **A session that reads strangers' text can't send or change memory.** Only the owner, or a rule the owner signed, sends.
+8. **Any host.** Claude, OpenCode, ChatGPT, a local model or an agent runtime can drive the home.
+9. **Small, extensible format.** A message is a signed event whose type names a public schema.
 
 ## How the network starts
 A network built on several people's private facts is worth nothing to its first member, so each part of the code has a job in getting past that:

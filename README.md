@@ -1,16 +1,16 @@
 # Synalla
 
-**Personal agents that exchange limited private facts and act only when interests align.**
+**Your own AI agent: owned by you, working for you, talking with everyone else's.**
 
 The name comes from *synallagma* (Greek συνάλλαγμα): a mutual exchange between parties, each bound to the other. Aristotle used it for voluntary transactions; civil law still calls a two-sided contract *synallagmatic*.
 
-Each person's agent knows private things about them: their pay, what they'd accept, what they'd sell, what they're quietly looking for. Agents compare limited facts, stay silent when there's no fit, and bring their owner in when there is. The owner decides. The value comes from facts spread across several people who wouldn't reveal them first, so no platform and no single AI can deliver it.
+Synalla gives each person a personal AI agent they fully own. It can use any model provider for the reasoning, but its memory and its knowledge of its owner stay with the owner. It builds a picture of who its owner is, for its owner only, and uses it to find what they want, whether they asked for it or not, by talking with the agents of other people, authors, producers, employers and companies.
 
+- **A parent's agent** notices that an author offers a reading method suited to their child's stage, something the parent never knew to look for. The parent looks and decides, or asks the agent to see what other authors offer. If the answer is no, the agent remembers and doesn't bring it up again.
+- **A job search** where your agent and an employer's agent learn about each other only if the role clears your private floor.
 - **Your pay against people doing your job**, and nobody sees your number.
-- **Quietly open to moving**, matched with a company quietly hiring, and each learns of the other only if both fit.
-- **Eight tenants with the same problem**, revealed only once enough of them have spoken.
 
-The agent's home is owned by the person and reachable at a key no server controls. The model is rented; the home is theirs.
+Sellers reach the people who actually want what they offer, so ads become pointless. Fewer intermediaries sit between producers and buyers. The model is rented; the home is yours.
 
 ## Status
 
