@@ -77,7 +77,7 @@ People without an invite aren't locked out: a one-person proof (passport or EU w
 - **Interoperation** with Dina homes and Index Network communities, which already have users.
 - Nothing is scraped against a site's terms, and no profile is ever created for a person who didn't join.
 
-*Status:* planned; the event format is Nostr's, so Nostr keys and relays work as they are.
+*In the code:* `followedByFollows` in `src/trust.js` counts how many accounts the owner follows also follow a sender, from signed follow lists; three or more give tier C, never higher on their own. The rest is planned; the event format is Nostr's, so Nostr keys and relays work as they are.
 
 ### 6. The hard side comes later and pays nothing to start (counterparties)
 People come first and pay nothing. Companies take part by publishing one signed offer, with no account. Until they do, derived offers from public job ads stand in for them, clearly labelled. Paid outcomes (a consented hire, a switch) come only after a match both sides accepted.

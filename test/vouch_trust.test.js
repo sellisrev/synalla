@@ -97,3 +97,22 @@ test('removing a member strikes and suspends the voucher; two strikes cut their 
   assert.equal(g.hops([owner.pk], good.pk), Infinity);
   assert.equal(admissionTier({ owner: owner.pk, graph: g, sender: bad1.pk }).tier, 'D');
 });
+
+import { signEvent as _sign } from '../src/event.js';
+import { followedByFollows } from '../src/trust.js';
+
+test('follow lists give a capped tier-C signal', () => {
+  const owner = person(), sender = person();
+  const friends = [person(), person(), person(), person()];
+  const fl = (p, follows, t = T0) => _sign({ kind: 3, created_at: t, tags: follows.map(f => ['p', f.pk]), content: '' }, p.sk);
+  const lists = [fl(owner, friends), fl(friends[0], [sender]), fl(friends[1], [sender]), fl(friends[2], [sender, owner])];
+  assert.equal(followedByFollows(lists, owner.pk, sender.pk), 3);
+  assert.equal(admissionTier({ owner: owner.pk, sender: sender.pk, proofs: { followedBy: 3 } }).tier, 'C');
+  assert.equal(admissionTier({ owner: owner.pk, sender: sender.pk, proofs: { followedBy: 2 } }).tier, 'D');
+  // a newer list from friends[2] that drops the sender wins
+  assert.equal(followedByFollows([...lists, fl(friends[2], [owner], T0 + 1)], owner.pk, sender.pk), 2);
+  // forged lists and lists from accounts the owner doesn't follow don't count
+  const forged = fl(friends[3], [sender]); forged.tags.push(['p', person().pk]);
+  const stranger = person();
+  assert.equal(followedByFollows([...lists, forged, fl(stranger, [sender])], owner.pk, sender.pk), 3);
+});
