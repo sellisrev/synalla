@@ -7,7 +7,7 @@ This code is a reference for the rules, tested on synthetic data. It is not read
 |---|---|
 | The differencing check covers counts and sums | Quartiles and medians aren't linear. The check is a strong proxy for them, not a proof |
 | Progress counts are public and exact | They reveal how many people joined a group, never who. In a small group, taking part can itself be sensitive |
-| "Waiting" groups are listed | A group with k or more people that can't be published this round shows that a small remainder exists |
+| "Waiting" groups are listed | A group with k or more people that can't be published this round is listed with one generic reason, whatever held it back. Its presence still shows that something did |
 | Record keys aren't authenticated here | Anyone who can submit records can submit many. One-per-person keys (proofs, vouches) must be enforced before a record reaches the pool |
 | Published results stay published | A person who deletes their record is removed from future rounds, but earlier releases that included them remain, marked with their round |
 | Cost grows with history | Every past release is part of the check. Fine for thousands of records and dozens of rounds; long-lived questions need compaction |

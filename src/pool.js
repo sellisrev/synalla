@@ -208,11 +208,14 @@ export function publishRound(question, records, history = [], { round, at } = {}
   const accepted = []; // {spec, members, stats, round}
   const published = [];
   const waiting = [];
+  // One reason for every withheld group: saying "too uniform" would tell members that
+  // nearly all of them share one value.
+  const WAIT = 'result due in a coming round';
   for (const { spec, members } of ordered) {
     const label = groupLabel(q, spec);
     if (members.length < q.k) continue; // locked: only its progress card is shown
     if (new Set(members.map(m => m.value)).size < q.minDistinct) {
-      waiting.push({ label, reason: 'values too uniform to publish' });
+      waiting.push({ label, reason: WAIT });
       continue;
     }
     const ids = members.map(ident);
@@ -222,7 +225,7 @@ export function publishRound(question, records, history = [], { round, at } = {}
     if (!repeat) sets.push(ids);
     const { safe } = differencingCheck(sets, q.k);
     if (!safe) {
-      waiting.push({ label, reason: 'waiting for more changes before the next release' });
+      waiting.push({ label, reason: WAIT });
       continue;
     }
     const st = stats(members.map(m => m.value));

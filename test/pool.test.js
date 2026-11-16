@@ -130,7 +130,9 @@ test('uniform values are withheld', () => {
   for (let i = 0; i < 6; i++) s.upsert(key(), { role: 'PM', region: 'Paris' }, 50000);
   const r = publishRound(Q, s.all(), [], { round: 1, at: 'x' });
   assert.equal(r.release.groups.length, 0);
-  assert.ok(r.release.waiting.every(w => /uniform/.test(w.reason)));
+  // withheld for uniformity looks exactly like withheld for differencing
+  assert.ok(r.release.waiting.length > 0);
+  assert.ok(r.release.waiting.every(w => w.reason === 'result due in a coming round'));
 });
 
 test('personal view falls back to the narrowest published group and shows locked progress', () => {
