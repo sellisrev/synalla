@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sellisrev/synallagma/blob/main/schemas/release.json",
+  "title": "Round release",
+  "description": "Public results of one round. Groups carried over from an earlier round have asOfRound.",
+  "type": "object",
+  "required": ["question", "round", "k", "groups"],
+  "properties": {
+    "question": { "type": "string" },
+    "round": { "type": "integer", "minimum": 1 },
+    "at": { "type": "string" },
+    "k": { "type": "integer", "minimum": 5 },
+    "groups": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["spec", "label", "count", "q1", "median", "q3"],
+        "properties": {
+          "spec": { "type": "object", "additionalProperties": { "type": "string" } },
+          "label": { "type": "string" },
+          "count": { "type": "integer" },
+          "q1": { "type": "number" }, "median": { "type": "number" }, "q3": { "type": "number" },
+          "asOfRound": { "type": "integer" }
+        }
+      }
+    },
+    "waiting": { "type": "array", "items": { "type": "object", "properties": { "label": { "type": "string" }, "reason": { "type": "string" } } } },
+    "note": { "type": "string" }
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sellisrev/synallagma/blob/main/schemas/question.json",
+  "title": "Private question",
+  "description": "A group question: fields asked, the ladder of groups compared, and the minimum group size. Carried as the content of a QUESTION event.",
+  "type": "object",
+  "required": ["id", "attributes", "broadenOrder", "k"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 },
+    "title": { "type": "string" },
+    "valueLabel": { "type": "string", "description": "What the value means, with unit and basis" },
+    "attributes": {
+      "type": "object",
+      "description": "Attribute name -> allowed values. Values are bands or categories, never free text.",
+      "additionalProperties": { "type": "array", "items": { "type": "string" }, "minItems": 1, "uniqueItems": true }
+    },
+    "attributeOrder": { "type": "array", "items": { "type": "string" } },
+    "broadenOrder": { "type": "array", "items": { "type": "string" }, "description": "Attributes dropped in turn, from the narrowest group to the broadest" },
+    "k": { "type": "integer", "minimum": 5, "description": "Minimum group size; 15 by default" },
+    "minDistinct": { "type": "integer", "minimum": 1 },
+    "rounding": { "type": "number", "exclusiveMinimum": 0 },
+    "valueMin": { "type": "number" },
+    "valueMax": { "type": "number" }
+  },
+  "additionalProperties": false
+}

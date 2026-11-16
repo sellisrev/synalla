@@ -1,0 +1,18 @@
+{
+  "id": "pay-product-fr-2027",
+  "title": "Fixed pay, product roles, France",
+  "valueLabel": "fixed yearly gross pay, full-time equivalent, EUR",
+  "attributes": {
+    "role": ["Product designer", "Product manager", "QA engineer"],
+    "seniority": ["Junior", "Mid", "Senior", "Lead"],
+    "region": ["Paris", "Lyon", "Other France"],
+    "company_type": ["Startup", "Scale-up", "Large company"]
+  },
+  "attributeOrder": ["role", "seniority", "region", "company_type"],
+  "broadenOrder": ["company_type", "region", "seniority"],
+  "k": 15,
+  "minDistinct": 3,
+  "rounding": 1000,
+  "valueMin": 15000,
+  "valueMax": 400000
+}

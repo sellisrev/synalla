@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/sellisrev/synallagma/blob/main/schemas/offer.json",
+  "title": "Offer",
+  "description": "Content of an OFFER event. Offers converted from a public ad have source.kind = public_ad and keep the ad's URL; they are never shown as published by a person or company.",
+  "type": "object",
+  "required": ["type", "title", "source"],
+  "properties": {
+    "type": { "enum": ["job", "sale", "tender", "service"] },
+    "title": { "type": "string" },
+    "role": { "type": "string" },
+    "region": { "type": "string" },
+    "payMin": { "type": "number" },
+    "payMax": { "type": "number" },
+    "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+    "period": { "enum": ["year", "month", "hour"] },
+    "expiresAt": { "type": "integer" },
+    "source": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": { "enum": ["direct", "public_ad"] },
+        "url": { "type": "string", "format": "uri" },
+        "retrievedAt": { "type": "string" }
+      },
+      "if": { "properties": { "kind": { "const": "public_ad" } } },
+      "then": { "required": ["kind", "url"] }
+    }
+  }
+}
