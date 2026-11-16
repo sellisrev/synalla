@@ -1,0 +1,96 @@
+[
+  {
+    "id": "plain-qa-lyon",
+    "note": "Full time, 12 months. Fixed 4,500 x 12 = 54,000.",
+    "truth": {
+      "attrs": {
+        "role": "QA engineer",
+        "seniority": "Mid",
+        "region": "Lyon",
+        "company_type": "Scale-up"
+      },
+      "value": 54000
+    },
+    "ident": [
+      "ROUSSEL",
+      "Camille",
+      "EXEMPLUM",
+      "999 100",
+      "999100",
+      "69 999",
+      "9999 4000",
+      "00412",
+      "Tilleuls"
+    ]
+  },
+  {
+    "id": "month13-pm-lyon",
+    "note": "13-month pay stated in a note. Fixed 5,000 x 13 = 65,000.",
+    "truth": {
+      "attrs": {
+        "role": "Product manager",
+        "seniority": "Senior",
+        "region": "Lyon",
+        "company_type": "Large company"
+      },
+      "value": 65000
+    },
+    "ident": [
+      "BENSALEM",
+      "Mehdi",
+      "FICTIVIA",
+      "999 220",
+      "999220",
+      "75 999",
+      "9999 1010"
+    ]
+  },
+  {
+    "id": "parttime-designer-lyon",
+    "note": "80% part time with a one-off bonus. Fixed FTE = 3,600 / 0.8 x 12 = 54,000; the 6,000 bonus is excluded.",
+    "truth": {
+      "attrs": {
+        "role": "Product designer",
+        "seniority": "Mid",
+        "region": "Lyon",
+        "company_type": "Startup"
+      },
+      "value": 54000
+    },
+    "ident": [
+      "FONTANEL",
+      "Inès",
+      "Ines",
+      "PLACEBO",
+      "999 556",
+      "999556",
+      "38 999",
+      "9999 8073"
+    ]
+  },
+  {
+    "id": "overtime-qa-paris",
+    "note": "Paris, overtime and a transport refund this month. Fixed 4,200 x 12 = 50,400, rounded to 50,000.",
+    "truth": {
+      "attrs": {
+        "role": "QA engineer",
+        "seniority": "Lead",
+        "region": "Paris",
+        "company_type": "Large company"
+      },
+      "value": 50000
+    },
+    "ident": [
+      "MARCHETTI",
+      "Julien",
+      "DEMONSTRA",
+      "999 777",
+      "999777",
+      "92 999",
+      "9999 3000",
+      "B-77310",
+      "Modèle",
+      "Modele"
+    ]
+  }
+]
