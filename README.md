@@ -25,6 +25,7 @@ Early. This repository holds the rules that don't depend on any one host or tran
 | `src/offers.js` | Signed offers and private judging against the owner's limits |
 | `src/knock.js`, `src/gate.js` | Typed first contact, and the home's gate that routes it by tier, category and daily limits |
 | `src/seal.js` | Sealed mail: NIP-44 v2 encryption and NIP-59 gift wrap, checked against the official test vectors |
+| `src/circle.js` | A convener's kit: single-use invite links (code kept in the URL fragment) and shareable progress cards |
 
 Nothing here publishes to public relays or handles real data. See [docs/limits.md](docs/limits.md).
 
@@ -37,6 +38,8 @@ npm install --ignore-scripts
 npm test
 npm run demo
 ```
+
+`node examples/share_card.mjs card.svg` writes a sample progress card.
 
 The demo simulates a cold start with synthetic people: one agent alone on day 0 judging public job ads, then three conveners starting invite chains, weekly rounds of group results, progress cards to share, and the admission tiers that result.
 

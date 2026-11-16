@@ -66,6 +66,7 @@ The value depends on private facts held by two or more parties, and at least one
 | `src/knock.js` | Typed first contact: categories, fields, a short note with no links, contacts or handles |
 | `src/gate.js` | The home's gate: verifies, tiers, checks the category's minimum tier and daily limits, logs every decision |
 | `src/seal.js` | NIP-44 v2 encryption and NIP-59 gift wrap for first-contact mail |
+| `src/circle.js` | Invite links for a convener's circle and progress cards to share |
 | `schemas/` | JSON Schemas for the objects above |
 
 Everything else in the tables above is design, not code yet.

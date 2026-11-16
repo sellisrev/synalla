@@ -60,14 +60,14 @@ So one role across one country is an atomic network at about 60 people, and the 
 ### 3. Thresholds turn waiting into progress (value)
 Before a group reaches k, the only thing shown is progress: "QA engineer · Senior: 11 of 15, 4 more to unlock". The card never says who shared it or whether they took part, so anyone can post it. This is an assurance contract without money: contributing early costs nothing, the result appears once enough people join, and early contributors always get the broader group's answer in the meantime. Contributing is the price of seeing your own position (give-to-get). Group results, once unlocked, can be public, because the chart is what spreads.
 
-*In the code:* `progressCard`, `publishRound`, `personalView`.
+*In the code:* `progressCard`, `publishRound`, `personalView`; `progressCardSvg` in `src/circle.js` draws the card at the size LinkedIn previews use.
 
 ### 4. Invites are vouches (trust)
 An invite link is a one-time code. Redeeming it gives the newcomer a signed vouch from the person who invited them, so they arrive with a place in the web of trust instead of none. The inviter is accountable: if someone they vouched for is removed, they get a strike and can't vouch for anyone new for a period, and a second strike cuts their whole branch. Each home computes tiers from its own contacts and the vouches it sees: contacts and people they invited go to the inbox, two invites away gets a knock card, and strangers with no vouch or proof are dropped. A convener's circle is a starter pack with accountability.
 
 People without an invite aren't locked out: a one-person proof (passport or EU wallet) or a refundable deposit gets them into the requests folder, at a low daily cap.
 
-*In the code:* `src/vouch.js` (`createInvite`, `redeemInvite`, `acceptRedemption`, `VouchGraph`), `src/trust.js` (`admissionTier`).
+*In the code:* `src/vouch.js` (`createInvite`, `redeemInvite`, `acceptRedemption`, `VouchGraph`), `src/trust.js` (`admissionTier`). Conveners get batches of single-use links from `createCircle` in `src/circle.js`; the code travels in the link's fragment, so no web page that hosts the link ever receives it.
 
 ### 5. Borrow existing graphs and channels, within their rules (trust, install, counterparties)
 - **The AI people already use** is the first host: no install for the first question.
