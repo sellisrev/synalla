@@ -1,3 +1,5 @@
 node_modules/
 .DS_Store
 *.log
+# Local working notes (research, strategy, test runs); never published
+internal/

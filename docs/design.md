@@ -22,6 +22,16 @@ The value depends on private facts held by two or more parties, and at least one
 6. **Any host.** Claude, OpenCode, ChatGPT, a local model or an agent runtime can drive the home.
 7. **Small, extensible format.** A message is a signed event whose type names a public schema.
 
+## How the network starts
+A network built on several people's private facts is worth nothing to its first member, so each part of the code has a job in getting past that:
+
+- **One agent alone is still useful.** It judges signed public offers, including offers derived from public job ads (always labelled as derived), against limits only its owner knows (`offers.js`).
+- **Circles start through conveners.** A meetup organiser or community lead hands out single-use invite links (`circle.js`). Redeeming one gives the newcomer a vouch, so they arrive with a place in the web of trust instead of none, and the inviter is accountable for them (`vouch.js`, `trust.js`).
+- **Waiting is shown as progress.** Before a group reaches its minimum size, only "11 of 15, 4 more to unlock" is shown. The card never reveals who shared it (`pool.js`, `circle.js`).
+- **Early contributors get a broader answer.** Each question has a ladder of groups from narrow to broad, and people see the narrowest one that has unlocked. With 15 people per group and three roles, about 60 contributors give most people a role-level result, while the narrowest groups need several hundred, so circles start with one role across one country.
+- **Existing graphs help, within limits.** Nostr follow lists count as a capped signal (`trust.js`), and the format is Nostr's, so existing keys and relays work.
+- **No shortcuts.** No fake users, no profiles of people who didn't join, no scraping against a site's terms.
+
 ## Layers
 ```
  Owner ── approves ──┐

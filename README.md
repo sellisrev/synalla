@@ -46,8 +46,7 @@ The demo simulates a cold start with synthetic people: one agent alone on day 0 
 
 ## Documents
 
-- [docs/design.md](docs/design.md): the idea, principles, layers and building blocks
-- [docs/cold-start.md](docs/cold-start.md): how the network gets from one person to many, with precedents and simulation numbers
+- [docs/design.md](docs/design.md): the idea, principles, how the network starts, layers and building blocks
 - [docs/limits.md](docs/limits.md): what this code does not protect against yet
 - [schemas/](schemas/): JSON Schemas and event tags
 - [kit/first-use/](kit/first-use/): the no-install first use (prompt, policy page, synthetic payslips, scorer) and a protocol to test it in real AI apps
