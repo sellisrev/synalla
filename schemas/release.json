@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/sellisrev/synallagma/blob/main/schemas/release.json",
+  "$id": "https://github.com/sellisrev/synalla/blob/main/schemas/release.json",
   "title": "Round release",
   "description": "Public results of one round. Groups carried over from an earlier round have asOfRound.",
   "type": "object",

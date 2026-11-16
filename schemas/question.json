@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/sellisrev/synallagma/blob/main/schemas/question.json",
+  "$id": "https://github.com/sellisrev/synalla/blob/main/schemas/question.json",
   "title": "Private question",
   "description": "A group question: fields asked, the ladder of groups compared, and the minimum group size. Carried as the content of a QUESTION event.",
   "type": "object",

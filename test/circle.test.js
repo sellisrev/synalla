@@ -14,7 +14,7 @@ test('a circle of links can be redeemed from the link alone', () => {
   assert.equal(new Set(circle.map(c => c.code)).size, 3);
   const graph = new VouchGraph();
   for (const { link, invite, code } of circle) {
-    assert.ok(link.startsWith('synallagma://join#'));
+    assert.ok(link.startsWith('synalla://join#'));
     const parsed = parseInviteLink(link);
     assert.equal(parsed.code, code);
     assert.equal(parsed.scope, 'pay-product-fr-2027');
@@ -36,10 +36,10 @@ test('the code sits in the fragment, so a hosting page never receives it', () =>
 });
 
 test('malformed links are refused', () => {
-  assert.throws(() => parseInviteLink('synallagma://join'), /no invite/);
-  assert.throws(() => parseInviteLink('synallagma://join#!!!'), /unreadable|version|malformed/);
+  assert.throws(() => parseInviteLink('synalla://join'), /no invite/);
+  assert.throws(() => parseInviteLink('synalla://join#!!!'), /unreadable|version|malformed/);
   const bad = Buffer.from(JSON.stringify({ v: 1, i: 'x', p: 'y', c: 'z' })).toString('base64url');
-  assert.throws(() => parseInviteLink(`synallagma://join#${bad}`), /malformed/);
+  assert.throws(() => parseInviteLink(`synalla://join#${bad}`), /malformed/);
 });
 
 test('progress card SVG shows the group only and escapes text', () => {

@@ -1,8 +1,8 @@
-# Synallagma
+# Synalla
 
 **Personal agents that exchange limited private facts and act only when interests align.**
 
-*Synallagma* (Greek συνάλλαγμα) is a mutual exchange between parties, each bound to the other. Aristotle used it for voluntary transactions; civil law still calls a two-sided contract *synallagmatic*.
+The name comes from *synallagma* (Greek συνάλλαγμα): a mutual exchange between parties, each bound to the other. Aristotle used it for voluntary transactions; civil law still calls a two-sided contract *synallagmatic*.
 
 Each person's agent knows private things about them: their pay, what they'd accept, what they'd sell, what they're quietly looking for. Agents compare limited facts, stay silent when there's no fit, and bring their owner in when there is. The owner decides. The value comes from facts spread across several people who wouldn't reveal them first, so no platform and no single AI can deliver it.
 

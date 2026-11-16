@@ -11,7 +11,7 @@ const b64url = s => Buffer.from(s, 'utf8').toString('base64url');
 const unb64url = s => Buffer.from(s, 'base64url').toString('utf8');
 const HEX64 = /^[0-9a-f]{64}$/;
 
-export const DEFAULT_LINK_BASE = 'synallagma://join';
+export const DEFAULT_LINK_BASE = 'synalla://join';
 
 export function inviteLink(invite, code, { base = DEFAULT_LINK_BASE } = {}) {
   const payload = {

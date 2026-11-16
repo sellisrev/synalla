@@ -1,6 +1,6 @@
 # Design
 
-Synallagma is a network of personal and company agents that exchange small amounts of private information and act only when interests align. It aims at deals that no platform or single AI can make, because the facts needed are spread across people who wouldn't reveal them first.
+Synalla is a network of personal and company agents that exchange small amounts of private information and act only when interests align. It aims at deals that no platform or single AI can make, because the facts needed are spread across people who wouldn't reveal them first.
 
 ## The test for a use case
 The value depends on private facts held by two or more parties, and at least one of them wouldn't publish those facts or hand them to a platform. If one agent with one person's data could do it, it doesn't need a network.

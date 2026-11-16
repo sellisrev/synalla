@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/sellisrev/synallagma/blob/main/schemas/record.json",
+  "$id": "https://github.com/sellisrev/synalla/blob/main/schemas/record.json",
   "title": "Answer record",
   "description": "One person's answer to a question. Holds no name, employer, email or address. The key is random and lets its holder update or delete the record.",
   "type": "object",

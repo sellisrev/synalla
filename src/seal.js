@@ -1,7 +1,7 @@
 // Sealed mail: NIP-44 v2 encryption and NIP-59 gift wrap, as used by NIP-17 private messages.
 //
 // A message to an agent is wrapped twice:
-//   rumor  the event itself (any of Synallagma's events, signed or not)
+//   rumor  the event itself (any of Synalla's events, signed or not)
 //   seal   kind 13, signed by the real sender, content = NIP-44(rumor) to the recipient
 //   wrap   kind 1059, signed by a one-time key, content = NIP-44(seal), tagged with the recipient
 // Relays see the recipient key, size and an imprecise time, never the sender or the content.

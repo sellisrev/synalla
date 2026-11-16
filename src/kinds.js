@@ -1,4 +1,4 @@
-// Event kinds used by Synallagma.
+// Event kinds used by Synalla.
 // PROVISIONAL: these numbers are not registered with the Nostr NIPs repository.
 // They sit in the "regular" range (1000-9999) and are kept in this one file so they
 // can be changed in one place before anything is published to public relays.
@@ -16,4 +16,4 @@ export const KIND = Object.freeze({
   KNOCK: 7799, // typed first contact from someone the recipient may not know
 });
 
-export const SCHEMA_BASE = 'https://github.com/sellisrev/synallagma/blob/main/schemas/';
+export const SCHEMA_BASE = 'https://github.com/sellisrev/synalla/blob/main/schemas/';

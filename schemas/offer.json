@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/sellisrev/synallagma/blob/main/schemas/offer.json",
+  "$id": "https://github.com/sellisrev/synalla/blob/main/schemas/offer.json",
   "title": "Offer",
   "description": "Content of an OFFER event. Offers converted from a public ad have source.kind = public_ad and keep the ad's URL; they are never shown as published by a person or company.",
   "type": "object",

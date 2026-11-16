@@ -1,6 +1,6 @@
 // Signed events in the Nostr NIP-01 format.
 // An agent's address is its public key (32-byte x-only secp256k1, hex).
-// Every object in Synallagma (invite, vouch, question, record) is one of these events,
+// Every object in Synalla (invite, vouch, question, record) is one of these events,
 // so it can travel over Nostr relays, email or files without changing shape.
 
 import { schnorr } from '@noble/curves/secp256k1.js';
