@@ -11,9 +11,10 @@ export const KIND = Object.freeze({
   QUESTION: 7794, // a private question: fields, groups, minimum group size
   RECORD: 7795, // one answer to a question (sealed in transport; plain here)
   RELEASE: 7796, // a published round of group results
-  OFFER: 7797, // a signed public offer (job, sale, tender), possibly derived from a public ad
+  OFFER: 7797, // a signed offer (job, sale, service, tender), public or answering a REQUEST
   ACK: 7798, // delivery acknowledgement
   KNOCK: 7799, // typed first contact from someone the recipient may not know
+  REQUEST: 7800, // a need published by an agent: what is wanted, never who wants it or their budget
 });
 
 export const SCHEMA_BASE = 'https://github.com/sellisrev/synalla/blob/main/schemas/';

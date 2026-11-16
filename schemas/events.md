@@ -14,3 +14,4 @@ All objects travel as Nostr NIP-01 events. Kinds are provisional (see `src/kinds
 | 7797 | OFFER | company, or whoever derived it | `type`, `source`, optional `t` role, `g` region, `expiration` | `offer.json` |
 | 7798 | ACK | recipient | `e` acknowledged event | empty |
 | 7799 | KNOCK | sender | `category`, optional `p` recipient | `knock.json`: category, its fields, a note of at most 280 characters with no links, contacts or handles |
+| 7800 | REQUEST | asker's agent | `category`, `t` topics, optional `g` region, `expiration` | JSON: `v`, category, topics, region, a note of at most 200 characters with no links, contacts, private terms or budget. Offers answering it carry `e` with its id |
