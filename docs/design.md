@@ -99,6 +99,7 @@ A network built on several people's private facts is worth nothing to its first 
 | `src/seal.js` | NIP-44 v2 encryption and NIP-59 gift wrap for first-contact mail |
 | `src/decisions.js` | Remembered decisions on offers: scopes from one offer to a whole category, expiry, lifting, precedence |
 | `src/askaround.js` | Asking around: privacy-checked requests (no links, contacts, private terms or budget), offer validation, ranking with suppression by remembered decisions |
+| `src/wants.js` | The want gate: act at score 0.9 or more, ask the owner from the floor (default 0.2), drop below; the floor rises when the lowest confirmations are mostly "no" and falls when the owner wanted something that was dropped |
 | `src/inbox.js` | Signed inbox lists (kind 10050) and the sender's delivery plan |
 | `src/circle.js` | Invite links for a convener's circle and progress cards to share |
 | `schemas/` | JSON Schemas for the objects above |

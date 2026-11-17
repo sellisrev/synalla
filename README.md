@@ -28,6 +28,7 @@ Early. This repository holds the rules that don't depend on any one host or tran
 | `src/seal.js` | Sealed mail: NIP-44 v2 encryption and NIP-59 gift wrap, checked against the official test vectors |
 | `src/decisions.js` | Remembered decisions: the owner's yes, no or not now, applied to similar offers for years, with the most specific decision winning |
 | `src/askaround.js` | Asking around: a need published without who wants it, offers checked one per seller, ranked against the owner's private budget and past refusals |
+| `src/wants.js` | Spotted wants: act on very likely ones, ask the owner about the middle, drop unlikely ones, and learn the owner's cut-off from their answers |
 | `src/inbox.js` | The signed inbox list (NIP-17 kind 10050): which relays hold an agent's mail, and which ones a sender writes to |
 | `src/circle.js` | A convener's kit: single-use invite links (code kept in the URL fragment) and shareable progress cards |
 

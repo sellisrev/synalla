@@ -11,3 +11,4 @@ export * from './circle.js';
 export * from './inbox.js';
 export * from './decisions.js';
 export * from './askaround.js';
+export * from './wants.js';
