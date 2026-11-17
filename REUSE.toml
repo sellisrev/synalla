@@ -1,0 +1,13 @@
+version = 1
+
+[[annotations]]
+path = "**"
+precedence = "closest"
+SPDX-FileCopyrightText = "2026 Serge Versillé"
+SPDX-License-Identifier = "AGPL-3.0-only OR LicenseRef-Synalla-Commercial"
+
+[[annotations]]
+path = "test/vectors/nip44.vectors.json"
+precedence = "override"
+SPDX-FileCopyrightText = "Paul Miller and NIP-44 contributors (https://github.com/paulmillr/nip44)"
+SPDX-License-Identifier = "Unlicense"

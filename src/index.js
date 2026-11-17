@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 export * from './event.js';
 export * from './kinds.js';
 export * from './vouch.js';

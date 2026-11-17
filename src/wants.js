@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Spotted wants: when the agent reads something that may hold a want, decide whether to act on it, ask the owner,
 // or let it go, and learn the owner's own cut-off from their answers.
 // The owner is asked only in the middle: a very sure want is acted on, an unlikely one is dropped. Pure: no I/O,

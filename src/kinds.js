@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Event kinds used by Synalla.
 // PROVISIONAL: these numbers are not registered with the Nostr NIPs repository.
 // They sit in the "regular" range (1000-9999) and are kept in this one file so they

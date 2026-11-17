@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Write a sample progress card as SVG (synthetic numbers).
 //   node examples/share_card.mjs [out.svg]
 import { writeFileSync } from 'node:fs';

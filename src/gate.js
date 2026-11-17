@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // The home's gate: what happens to an incoming knock, decided by code before any model sees it.
 //
 // Order of checks (first failure wins):

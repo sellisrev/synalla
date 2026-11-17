@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Tests for src/decisions.js (from the factory contract, plus regression tests).
 import { test } from 'node:test';
 import assert from 'node:assert/strict';

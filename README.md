@@ -61,4 +61,4 @@ Two, pinned to exact versions: `@noble/curves` and `@noble/hashes` (audited, no 
 
 ## Licence
 
-Not chosen yet. Until a licence is added, all rights are reserved.
+Dual-licensed: [GNU AGPL v3 only](LICENSE), or a commercial licence from the copyright holder. Third-party code keeps its own licence. See [LICENSING.md](LICENSING.md); contributions need the [CLA](CLA.md).

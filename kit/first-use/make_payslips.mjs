@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Builds the synthetic payslips used to test the first-use prompt, as HTML (print them to PDF).
 // Every person, company and number here is fictional.
 //   node kit/first-use/make_payslips.mjs

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Remembered decisions: the owner's yes / no / not now on offers, applied to similar offers later.
 // A "no" stands for years and covers similar offers, so the owner never has to repeat it.
 // Built by a local model (Qwen3.6-35B-A3B through OpenCode) against a written contract with hidden tests,

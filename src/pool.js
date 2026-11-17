@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Group answers that unlock at a threshold: the first use of the network, and its cold-start engine.
 //
 // A question ("where does my fixed pay stand among people like me?") defines attributes,

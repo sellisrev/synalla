@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // A simulated cold start, with synthetic people and synthetic pay. Nothing leaves this process.
 //
 //   node examples/cold_start_demo.mjs [weeks] [seed]

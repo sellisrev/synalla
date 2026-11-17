@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Sealed mail: NIP-44 v2 encryption and NIP-59 gift wrap, as used by NIP-17 private messages.
 //
 // A message to an agent is wrapped twice:

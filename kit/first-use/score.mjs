@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Score one AI reply against a synthetic payslip's truth.
 //   node kit/first-use/score.mjs <payslip-id> <reply.txt>
 // Prints one CSV line for scoring_sheet.csv: id, record_found, fields_valid, role_ok, seniority_ok,

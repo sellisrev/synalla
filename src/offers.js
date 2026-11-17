@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Signed offers, and judging them privately against the owner's limits.
 //
 // Cold start: a lone agent still has work to do. It can read public offers (job ads with a

@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // A convener's kit: invite links for a circle, and progress cards people can post.
 //
 // A link carries everything the invitee's agent needs to redeem: the invite id, the convener's

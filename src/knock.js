@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // First contact between strangers is a typed knock, not free text.
 //
 // A knock names a category from an open list, carries the structured fields that category

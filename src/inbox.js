@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Where to reach an agent: its signed inbox list (NIP-17, kind 10050).
 //
 // The address is the public key and never changes. The inbox list names the relays that hold

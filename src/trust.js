@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Admission tiers: what a home does with a first contact, decided by code before any model reads it.
 //
 //   A  contact, or vouched for by the owner or a contact      -> inbox

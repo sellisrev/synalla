@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Asking around: publish a need that says what is wanted but not who wants it, check the offers that come back,
 // and rank them against limits only the owner knows (budget, must-have topics, past refusals).
 // Built by a local model in the Synalla software factory from a written spec, then reviewed and fixed by hand.

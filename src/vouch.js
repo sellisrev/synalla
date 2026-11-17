@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Invites that become vouches, and the web of trust they build.
 //
 // Cold start: a new key has no history, so nobody can tell it from a spammer.

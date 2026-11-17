@@ -1,3 +1,6 @@
+// SPDX-FileCopyrightText: 2026 Serge Versillé
+// SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
+
 // Signed events in the Nostr NIP-01 format.
 // An agent's address is its public key (32-byte x-only secp256k1, hex).
 // Every object in Synalla (invite, vouch, question, record) is one of these events,
