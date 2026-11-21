@@ -32,9 +32,7 @@ export function buildRequest(need) {
   if (/https?:\/\//i.test(note) || /www\./i.test(note) || /\b[a-z0-9-]+\.(com|net|org|io|fr|de|at|uk|eu|me|app|ly)\b/i.test(note)
       || /[^\s@]+@[^\s@]+\.[^\s@]+/.test(note) || /(^|\s)@[A-Za-z0-9_]{2,}/.test(note))
     return { ok: false, errors: ['unsafe note'] };
-  if (/[+(]?\d(?:[\d\s().-]*\d)?/.test(note)) {
-    for (const n of note.match(/[+(]?\d(?:[\d\s().-]*\d)?/g)) if ((n.match(/\d/g) || []).length >= 9) return { ok: false, errors: ['long number'] };
-  }
+  for (const n of note.match(/[+(]?\d(?:[\d\s().-]*\d)?/g) || []) if (n.match(/\d/g).length >= 9) return { ok: false, errors: ['long number'] };
   const region = has('region') ? need.region : null;
   const days = has('days') ? need.days : 14;
   const joined = [note, need.category, ...need.topics, region].join('\n').toLowerCase();
