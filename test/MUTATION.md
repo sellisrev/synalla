@@ -16,6 +16,7 @@ the exact behaviour, or listed below as equivalent (no input can tell it apart) 
 | event.js | 60% | 89% (all remaining survivors accepted below) |
 | knock.js | 64% | 94% (all remaining survivors accepted below) |
 | vouch.js | 68% | 94% (all remaining survivors accepted below) |
+| pool.js | 73% | 97% (all remaining survivors accepted below) |
 | all files | 75.7% | (rerun pending) |
 
 ## Accepted survivors
@@ -57,3 +58,19 @@ the exact behaviour, or listed below as equivalent (no input can tell it apart) 
   key, so neither changes a hop count (L168 also covers a removed key that is its own root). Redundant guards.
 - L182 / L184 BFS `seen` bookkeeping: breadth-first order already returns the shortest distance and `maxHops` bounds
   the loop; only speed changes. Equivalent.
+
+### pool.js
+- L65 `typeof value !== 'number'` → `false`: `Number.isFinite` already rejects every non-number. Equivalent.
+- L141 loop bound `r < rows` → `true` / `<=`: once r reaches rows the pivot search finds nothing and continues.
+  Equivalent.
+- L147 Bareiss `/ prevPivot` → `* prevPivot`: changes the size of entries, never which are zero, so the rank is the
+  same (BigInt, no overflow). Equivalent for `rank`.
+- L178 early `safe` when there are no small atoms: the full computation gives the same answer. Equivalent.
+- L209 canonical tie-break `<` → `<=`: two candidate specs never have the same canonical text. Equivalent.
+- L228 pushing a repeated set again: a duplicate row does not change the rank. Equivalent.
+- L246 `<` → `<=` on equal rounds: two history rows for the same spec in the same round carry the same result.
+  Equivalent.
+
+Note: "fewer than k is not published" (L219) is backed by the differencing check, which also refuses a group below k.
+The tests pin L219 itself through what the differencing check cannot show: a group below k must not appear in the
+public `waiting` list, and a group of exactly k must be published.
