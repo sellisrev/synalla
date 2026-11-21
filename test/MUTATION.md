@@ -13,6 +13,8 @@ the exact behaviour, or listed below as equivalent (no input can tell it apart) 
 | seal.js | 67% | 94% (all remaining survivors accepted below) |
 | trust.js | 63% | 95% (all remaining survivors accepted below) |
 | gate.js | 68% | 100% |
+| event.js | 60% | 89% (all remaining survivors accepted below) |
+| knock.js | 64% | 94% (all remaining survivors accepted below) |
 | all files | 75.7% | (rerun pending) |
 
 ## Accepted survivors
@@ -32,3 +34,16 @@ the exact behaviour, or listed below as equivalent (no input can tell it apart) 
 - L44 the p-tag filter (`?? []`, both regex anchors, the default): the count tests exact membership of the sender's
   key, so malformed tags can never match it either way. Equivalent.
 - L65 default `contacts = []` → a placeholder array: it can never contain a real public key. Equivalent.
+
+### event.js
+- L14–15 hex anchors: a longer pubkey or sig makes `hexToBytes`/`schnorr.verify` throw, which `verifyEvent` reports as
+  false; through `signEvent` the pubkey is derived, so never malformed. Equivalent at the API.
+- L53 object check: `verifyEvent` catches the TypeError a non-object raises anyway; `signEvent` always builds an
+  object. Equivalent at the API.
+- L55 id format: an id that is not the lowercase hex hash already fails `eventId(e) !== e.id`. Equivalent.
+
+### knock.js
+- L35 email quantifiers: the pattern is unanchored, so `x+` and `x` match the same texts. Equivalent.
+- L40 `?? []` default, L42 the group split: a phone run always ends with a digit and can only start with a separator
+  when that separator is `(`, which already marks it as a phone. Equivalent.
+- L64 filter of non-text field values: the scan loop skips non-strings itself. Equivalent (redundant guard).
