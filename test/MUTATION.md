@@ -17,6 +17,8 @@ the exact behaviour, or listed below as equivalent (no input can tell it apart) 
 | knock.js | 64% | 94% (all remaining survivors accepted below) |
 | vouch.js | 68% | 94% (all remaining survivors accepted below) |
 | pool.js | 73% | 97% (all remaining survivors accepted below) |
+| offers.js | 56% | 96% (all remaining survivors accepted below) |
+| circle.js | 58% | 98% (all remaining survivors accepted below) |
 | all files | 75.7% | (rerun pending) |
 
 ## Accepted survivors
@@ -74,3 +76,12 @@ the exact behaviour, or listed below as equivalent (no input can tell it apart) 
 Note: "fewer than k is not published" (L219) is backed by the differencing check, which also refuses a group below k.
 The tests pin L219 itself through what the differencing check cannot show: a group below k must not appear in the
 public `waiting` list, and a group of exactly k must be published.
+
+### offers.js
+- L26 the `!= null` guards around `payMin > payMax`: a comparison with `undefined` is already false. Equivalent.
+- L70 / L71 / L73 `!= null` → `true`: a missing value becomes `NaN` or repeats `lo`, and every comparison with it gives
+  the same verdict. Equivalent. (L72 is not: with a floor of 0, `null >= 0` is true; a test pins that case.)
+
+### circle.js
+- L13 `Buffer.from(s, 'utf8')` → `''`: an empty encoding name defaults to UTF-8. Equivalent.
+- L39 `typeof p.c !== 'string'` → `false`: the hex regex rejects every non-string anyway. Equivalent.
