@@ -15,6 +15,7 @@ the exact behaviour, or listed below as equivalent (no input can tell it apart) 
 | gate.js | 68% | 100% |
 | event.js | 60% | 89% (all remaining survivors accepted below) |
 | knock.js | 64% | 94% (all remaining survivors accepted below) |
+| vouch.js | 68% | 94% (all remaining survivors accepted below) |
 | all files | 75.7% | (rerun pending) |
 
 ## Accepted survivors
@@ -47,3 +48,12 @@ the exact behaviour, or listed below as equivalent (no input can tell it apart) 
 - L40 `?? []` default, L42 the group split: a phone run always ends with a digit and can only start with a separator
   when that separator is `(`, which already marks it as a phone. Equivalent.
 - L64 filter of non-text field values: the scan loop skips non-strings itself. Equivalent (redundant guard).
+
+### vouch.js
+- L111 `entry.id > prev.id` → `>=`, L123 `at < prev` → `<=`, L134 sort `<` → `<=`: they differ only on equal ids,
+  equal times for the same key, or equal issuer+subject keys, none of which change the result. Equivalent.
+- L143, L173, L179, L181 placeholder arrays: a placeholder string is never a real key. Equivalent.
+- L168 removed-target guard, L169 removed-roots filter: `activeEdges` already drops every edge from or to a removed
+  key, so neither changes a hop count (L168 also covers a removed key that is its own root). Redundant guards.
+- L182 / L184 BFS `seen` bookkeeping: breadth-first order already returns the shortest distance and `maxHops` bounds
+  the loop; only speed changes. Equivalent.
