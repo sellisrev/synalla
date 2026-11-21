@@ -215,3 +215,16 @@ test('readInboxList: a URL in a tag other than relay is never read as a relay', 
     tags: [['p', 'wss://not-a-relay.example'], ['r', 'wss://also-not.example'], ['relay', 'wss://yes.example']] }, sk);
   assert.deepEqual(readInboxList([e], pk).relays, ['wss://yes.example']);
 });
+
+test('readInboxList: a newer list wins even when the older one has the higher id; list content is empty', () => {
+  let old, neu;
+  for (let i = 0; i < 200; i++) {
+    old = createInboxList(sk, [`wss://old${i}.example`], { createdAt: T0 + i });
+    neu = createInboxList(sk, [`wss://new${i}.example`], { createdAt: T0 + i + 1 });
+    if (old.id > neu.id) break;
+  }
+  assert.ok(old.id > neu.id, 'test setup: need the older list to have the higher id');
+  assert.equal(readInboxList([neu, old], pk).listId, neu.id);
+  assert.equal(readInboxList([old, neu], pk).listId, neu.id);
+  assert.equal(neu.content, '');
+});
