@@ -19,6 +19,8 @@ the exact behaviour, or listed below as equivalent (no input can tell it apart) 
 | pool.js | 73% | 97% (all remaining survivors accepted below) |
 | offers.js | 56% | 96% (all remaining survivors accepted below) |
 | circle.js | 58% | 98% (all remaining survivors accepted below) |
+| inbox.js | 77% | 99% (remaining survivor accepted below) |
+| wants.js | 69% | 98% (all remaining survivors accepted below) |
 | all files | 75.7% | (rerun pending) |
 
 ## Accepted survivors
@@ -85,3 +87,15 @@ public `waiting` list, and a group of exactly k must be published.
 ### circle.js
 - L13 `Buffer.from(s, 'utf8')` → `''`: an empty encoding name defaults to UTF-8. Equivalent.
 - L39 `typeof p.c !== 'string'` → `false`: the hex regex rejects every non-string anyway. Equivalent.
+
+### inbox.js
+- L36 `e.id > best.id` → `>=`: two different events never share an id. Equivalent.
+
+### wants.js
+- L22 `typeof v === 'object'` → `true`: strings and numbers fail the prototype check anyway. Equivalent.
+- L23 the `typeof v === 'number'` part of `isScore`: `Number.isFinite` and the 0..1 range reject every non-number.
+  Equivalent.
+- L70 trimming when `length > keep` → always / `>=`: slicing the last `keep` of a list that already fits changes
+  nothing. Equivalent.
+- L85 miss `score < floor` → `<=`: at the floor, the clamped new floor equals the old one and `change` does nothing.
+  Equivalent.
