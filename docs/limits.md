@@ -2,7 +2,7 @@
 
 This code is a reference for the rules, tested on synthetic data. It is not ready for real pay or real identities.
 
-## Group answers (`src/pool.js`)
+## Group answers (`src/pool.ts`)
 | Limit | What it means |
 |---|---|
 | The differencing check covers counts and sums | Quartiles and medians aren't linear. The check is a strong proxy for them, not a proof |
@@ -15,7 +15,7 @@ This code is a reference for the rules, tested on synthetic data. It is not read
 | Many identical values still show | With at least three distinct values a group publishes, so if most people share one value, the median is that value |
 | Ordering is broad first | Groups are tried from broad to narrow, so a broad result can block a narrower one in the same round |
 
-## Trust (`src/vouch.js`, `src/trust.js`)
+## Trust (`src/vouch.ts`, `src/trust.ts`)
 | Limit | What it means |
 |---|---|
 | Proofs are taken as given | `admissionTier` trusts the `proofs` it is passed. Verifying zk-email, passport or deposit proofs is outside this module |
@@ -26,7 +26,7 @@ This code is a reference for the rules, tested on synthetic data. It is not read
 | Used-invite counts are the issuer's job | `acceptRedemption` takes `usedCount` from the caller; the issuer's home must store it |
 | No rate-limiting nullifiers yet | Spam bounds that rely on RLN memberships are design only |
 
-## Gate and sealed mail (`src/gate.js`, `src/seal.js`)
+## Gate and sealed mail (`src/gate.ts`, `src/seal.ts`)
 | Limit | What it means |
 |---|---|
 | State is in memory | Seen ids, daily counts and the log live in the `Gate` object; a home must persist them |
@@ -34,11 +34,11 @@ This code is a reference for the rules, tested on synthetic data. It is not read
 | No forward secrecy | NIP-44 can't protect past mail if a key leaks. Long conversations belong in MLS |
 | Relays see the recipient | A gift wrap hides the sender and content, not the recipient key, size or rough time |
 
-## Offers (`src/offers.js`)
+## Offers (`src/offers.ts`)
 | Limit | What it means |
 |---|---|
 | Pay periods are converted with fixed factors | Hourly pay uses a 1,607-hour year (France, 35-hour week) |
 | Derived offers are only as true as their source | The signer vouches for the conversion, not for the employer |
 
 ## Event kinds
-The kinds in `src/kinds.js` are provisional and not registered with the Nostr NIPs. Nothing in this repository publishes to public relays.
+The kinds in `src/kinds.ts` are provisional and not registered with the Nostr NIPs. Nothing in this repository publishes to public relays.

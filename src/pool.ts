@@ -24,18 +24,28 @@
 
 export const MIN_K = 5; // hard floor: no caller can publish a group smaller than this
 
-/**
- * @typedef {{[attr:string]: string}} GroupSpec   attribute -> value; a missing attribute means "any"
- * @typedef {{key:string, version:number, attrs:{[attr:string]:string}, value:number}} PoolRecord
- * @typedef {{
- *   id:string, title?:string, valueLabel?:string,
- *   attributes:{[attr:string]: string[]},
- *   attributeOrder?:string[], broadenOrder:string[],
- *   k?:number, minDistinct?:number, rounding?:number, valueMin?:number, valueMax?:number
- * }} Question
- */
+/** attribute -> value; a missing attribute means "any". */
+export type GroupSpec = Record<string, string | undefined>;
+export interface PoolRecord { key: string; version: number; attrs: Record<string, string>; value: number }
+export interface Question {
+  id: string; title?: string; valueLabel?: string;
+  attributes: Record<string, string[]>;
+  attributeOrder?: string[]; broadenOrder?: string[];
+  k?: number; minDistinct?: number; rounding?: number; valueMin?: number; valueMax?: number;
+}
+export type NormalisedQuestion = Required<Question>;
+export interface Stats { count: number; q1: number; median: number; q3: number }
+export interface ProgressCard { label: string; count: number; k: number; needed: number; unlocked: boolean; text: string }
+export type PublishedGroup = { spec: GroupSpec; label: string; asOfRound?: number } & Stats;
+export interface Release {
+  question: string; round: number; at: string; k: number; groups: PublishedGroup[];
+  waiting: { label: string; reason: string }[]; note: string;
+}
+/** Kept by the collector, never published: needed to check the next round. */
+export interface PrivateRow { spec: GroupSpec; members: string[]; stats: Stats; round: number }
+export interface Position { result: PublishedGroup | null; position: string | null; locked: ProgressCard[] }
 
-export function normaliseQuestion(q) {
+export function normaliseQuestion(q: Question): NormalisedQuestion {
   if (!q || typeof q.id !== 'string' || !q.id) throw new TypeError('question.id required');
   if (!q.attributes || typeof q.attributes !== 'object') throw new TypeError('question.attributes required');
   const attributeOrder = q.attributeOrder ?? Object.keys(q.attributes);
@@ -51,52 +61,55 @@ export function normaliseQuestion(q) {
 
 /** Records keyed by a random record key. Upserting bumps the version; deleting removes it. */
 export class RecordStore {
-  constructor(question) {
+  q: NormalisedQuestion;
+  records: Map<string, PoolRecord>;
+
+  constructor(question: Question) {
     this.q = normaliseQuestion(question);
     this.records = new Map();
   }
 
-  upsert(key, attrs, value) {
+  upsert(key: string, attrs: Record<string, string>, value: number): PoolRecord {
     if (typeof key !== 'string' || key.length < 16) throw new TypeError('record key must be a string of 16+ chars');
     for (const [a, allowed] of Object.entries(this.q.attributes)) {
-      if (!allowed.includes(attrs?.[a])) throw new RangeError(`attribute ${a} must be one of ${allowed.join(', ')}`);
+      if (!allowed.includes(attrs?.[a] as string)) throw new RangeError(`attribute ${a} must be one of ${allowed.join(', ')}`);
     }
     for (const a of Object.keys(attrs)) if (!(a in this.q.attributes)) throw new RangeError(`unknown attribute ${a}`);
     if (typeof value !== 'number' || !Number.isFinite(value)) throw new TypeError('value must be a finite number');
     if (value < this.q.valueMin || value > this.q.valueMax) throw new RangeError('value out of range');
     const rounded = Math.round(value / this.q.rounding) * this.q.rounding;
     const prev = this.records.get(key);
-    const rec = { key, version: (prev?.version ?? 0) + 1, attrs: { ...attrs }, value: rounded };
+    const rec: PoolRecord = { key, version: (prev?.version ?? 0) + 1, attrs: { ...attrs }, value: rounded };
     this.records.set(key, rec);
     return rec;
   }
 
-  delete(key) {
+  delete(key: string): boolean {
     return this.records.delete(key);
   }
 
-  all() {
+  all(): PoolRecord[] {
     return [...this.records.values()];
   }
 }
 
-export function canonical(spec) {
+export function canonical(spec: GroupSpec): string {
   return JSON.stringify(Object.keys(spec).sort().map(k => [k, spec[k]]));
 }
 
-export function matches(spec, attrs) {
+export function matches(spec: GroupSpec, attrs: Record<string, string | undefined>): boolean {
   return Object.entries(spec).every(([a, v]) => attrs[a] === v);
 }
 
-export function groupLabel(q, spec) {
+export function groupLabel(q: Pick<NormalisedQuestion, 'attributeOrder'>, spec: GroupSpec): string {
   const parts = q.attributeOrder.filter(a => a in spec).map(a => spec[a]);
   return parts.length ? parts.join(' · ') : 'Everyone';
 }
 
 /** Groups containing these attributes, narrowest first. */
-export function ladder(question, attrs) {
+export function ladder(question: Question, attrs: Record<string, string | undefined>): GroupSpec[] {
   const q = normaliseQuestion(question);
-  const spec = {};
+  const spec: GroupSpec = {};
   for (const a of q.attributeOrder) spec[a] = attrs[a];
   const out = [{ ...spec }];
   for (const a of q.broadenOrder) {
@@ -107,7 +120,7 @@ export function ladder(question, attrs) {
 }
 
 /** Progress toward unlocking one group. Safe to share: it never says who took part. */
-export function progressCard(question, records, spec) {
+export function progressCard(question: Question, records: PoolRecord[], spec: GroupSpec): ProgressCard {
   const q = normaliseQuestion(question);
   const count = records.filter(r => matches(spec, r.attrs)).length;
   const needed = Math.max(0, q.k - count);
@@ -118,87 +131,81 @@ export function progressCard(question, records, spec) {
   return { label, count, k: q.k, needed, unlocked: needed === 0, text };
 }
 
-function quantile(sorted, p) {
+function quantile(sorted: number[], p: number): number {
   // nearest-rank
   const i = Math.max(0, Math.ceil(p * sorted.length) - 1);
-  return sorted[i];
+  return sorted[i]!;
 }
 
-function stats(values) {
+function stats(values: number[]): Stats {
   const s = [...values].sort((a, b) => a - b);
   return { count: s.length, q1: quantile(s, 0.25), median: quantile(s, 0.5), q3: quantile(s, 0.75) };
 }
 
-const ident = r => `${r.key}@${r.version}`;
+const ident = (r: PoolRecord): string => `${r.key}@${r.version}`;
 
 /** Exact rank over the rationals (fraction-free Gaussian elimination with BigInt). */
-export function rank(matrix) {
+export function rank(matrix: number[][]): number {
   const m = matrix.map(row => row.map(x => BigInt(x)));
   const rows = m.length;
-  const cols = rows ? m[0].length : 0;
+  const cols = rows ? m[0]!.length : 0;
   let r = 0;
   let prevPivot = 1n;
   for (let c = 0; c < cols && r < rows; c++) {
     let p = r;
-    while (p < rows && m[p][c] === 0n) p++;
+    while (p < rows && m[p]![c] === 0n) p++;
     if (p === rows) continue;
-    [m[r], m[p]] = [m[p], m[r]];
+    [m[r], m[p]] = [m[p]!, m[r]!];
+    const pivotRow = m[r]!;
     for (let i = r + 1; i < rows; i++) {
-      for (let j = c + 1; j < cols; j++) m[i][j] = (m[r][c] * m[i][j] - m[i][c] * m[r][j]) / prevPivot;
-      m[i][c] = 0n;
+      const row = m[i]!;
+      for (let j = c + 1; j < cols; j++) row[j] = (pivotRow[c]! * row[j]! - row[c]! * pivotRow[j]!) / prevPivot;
+      row[c] = 0n;
     }
-    prevPivot = m[r][c];
+    prevPivot = pivotRow[c]!;
     r++;
   }
   return r;
 }
 
-/**
- * Can these published sets (arrays of record identities) be combined to isolate fewer than k records?
- * @returns {{safe:boolean, smallAtoms:number}}
- */
-export function differencingCheck(sets, k) {
-  const sig = new Map(); // identity -> bitstring of membership
+/** Can these published sets (arrays of record identities) be combined to isolate fewer than k records? */
+export function differencingCheck(sets: string[][], k: number): { safe: boolean; smallAtoms: number } {
+  const sig = new Map<string, number[]>(); // identity -> bitstring of membership
   sets.forEach((set, i) => {
     for (const id of set) {
-      const cur = sig.get(id) ?? Array(sets.length).fill(0);
+      const cur: number[] = sig.get(id) ?? Array(sets.length).fill(0);
       cur[i] = 1;
       sig.set(id, cur);
     }
   });
-  const atoms = new Map(); // signature -> size
+  const atoms = new Map<string, number>(); // signature -> size
   for (const bits of sig.values()) {
     const key = bits.join('');
     atoms.set(key, (atoms.get(key) ?? 0) + 1);
   }
   const atomKeys = [...atoms.keys()];
   const M = sets.map((_, i) => atomKeys.map(a => Number(a[i])));
-  const large = atomKeys.map((a, j) => (atoms.get(a) >= k ? j : -1)).filter(j => j >= 0);
+  const large = atomKeys.map((a, j) => (atoms.get(a)! >= k ? j : -1)).filter(j => j >= 0);
   const smallAtoms = atomKeys.length - large.length;
   if (smallAtoms === 0) return { safe: true, smallAtoms };
-  const ML = M.map(row => large.map(j => row[j]));
+  const ML = M.map(row => large.map(j => row[j]!));
   const safe = rank(M) === (large.length ? rank(ML) : 0);
   return { safe, smallAtoms };
 }
 
 /**
- * Run one publication round.
- * @param {Question} question
- * @param {PoolRecord[]} records
- * @param {{round:number, rows:{spec:GroupSpec, members:string[], stats:object, round:number}[]}[]} history
- *        private state from earlier rounds
- * @returns {{release:object, privateRows:{spec:GroupSpec, members:string[], stats:object, round:number}[]}}
- *   `release` is public. `privateRows` must be kept by the collector, never published:
- *   it is needed to check the next round.
+ * Run one publication round. `history` is the private state from earlier rounds.
+ * `release` is public. `privateRows` must be kept by the collector, never published: it is needed to check the next round.
  */
-export function publishRound(question, records, history = [], { round, at } = {}) {
+export function publishRound(question: Question, records: PoolRecord[], history: { round: number; rows: PrivateRow[] }[] = [],
+  { round, at }: { round?: number | undefined; at?: string | undefined } = {}): { release: Release; privateRows: PrivateRow[] } {
   const q = normaliseQuestion(question);
   const roundNo = round ?? (history.length ? Math.max(...history.map(h => h.round)) + 1 : 1);
   const pastRows = history.flatMap(h => h.rows);
-  const pastByMembership = new Map(pastRows.map(r => [[...r.members].sort().join('|'), r]));
+  const pastByMembership = new Map<string, PrivateRow>(pastRows.map(r => [[...r.members].sort().join('|'), r]));
 
   // Candidate groups: every rung of every contributor's ladder.
-  const cands = new Map();
+  const cands = new Map<string, GroupSpec>();
   for (const r of records) for (const spec of ladder(q, r.attrs)) cands.set(canonical(spec), spec);
   const ordered = [...cands.values()].map(spec => {
     const members = records.filter(r => matches(spec, r.attrs));
@@ -208,9 +215,9 @@ export function publishRound(question, records, history = [], { round, at } = {}
     b.members.length - a.members.length ||
     (canonical(a.spec) < canonical(b.spec) ? -1 : 1));
 
-  const accepted = []; // {spec, members, stats, round}
-  const published = [];
-  const waiting = [];
+  const accepted: PrivateRow[] = [];
+  const published: PublishedGroup[] = [];
+  const waiting: { label: string; reason: string }[] = [];
   // One reason for every withheld group: saying "too uniform" would tell members that
   // nearly all of them share one value.
   const WAIT = 'result due in a coming round';
@@ -239,18 +246,18 @@ export function publishRound(question, records, history = [], { round, at } = {}
   // A group that was published before and can't be refreshed this round keeps its last result,
   // marked with the round it dates from. This reveals nothing new: it was already public.
   const fresh = new Set(published.map(g => canonical(g.spec)));
-  const latest = new Map();
+  const latest = new Map<string, PrivateRow>();
   for (const r of pastRows) {
     if (!r.stats) continue;
     const c = canonical(r.spec);
-    if (!latest.has(c) || latest.get(c).round < r.round) latest.set(c, r);
+    if (!latest.has(c) || latest.get(c)!.round < r.round) latest.set(c, r);
   }
   for (const [c, r] of latest) {
     if (fresh.has(c)) continue;
     published.push({ spec: r.spec, label: groupLabel(q, r.spec), ...r.stats, asOfRound: r.round });
   }
 
-  const release = {
+  const release: Release = {
     question: q.id,
     round: roundNo,
     at: at ?? new Date().toISOString(),
@@ -266,19 +273,19 @@ export function publishRound(question, records, history = [], { round, at } = {}
  * What one contributor sees: the narrowest published group they belong to, plus progress on
  * the narrower groups that are still locked (the reason to invite colleagues).
  */
-export function personalView(question, records, release, attrs, ownValue) {
+export function personalView(question: Question, records: PoolRecord[], release: Pick<Release, 'groups'>, attrs: Record<string, string | undefined>, ownValue?: number): Position {
   const q = normaliseQuestion(question);
   const rungs = ladder(q, attrs);
-  const byKey = new Map(release.groups.map(g => [canonical(g.spec), g]));
+  const byKey = new Map<string, PublishedGroup>(release.groups.map(g => [canonical(g.spec), g]));
   const best = rungs.map(s => byKey.get(canonical(s))).find(Boolean) ?? null;
-  const locked = [];
+  const locked: ProgressCard[] = [];
   for (const s of rungs) {
     if (byKey.has(canonical(s))) break;
     const card = progressCard(q, records, s);
     if (card.unlocked) card.text = `${card.label}: ${card.count} people, result due in a coming round`;
     locked.push(card);
   }
-  let position = null;
+  let position: string | null = null;
   if (best && typeof ownValue === 'number') {
     position = ownValue < best.q1 ? 'bottom quarter'
       : ownValue < best.median ? 'second quarter'

@@ -13,13 +13,38 @@
 // a quarantined reader (no tools, no memory writes) or the owner ever reads it.
 // Every decision is appended to the log the owner can read.
 
-import { verifyEvent, tagValue } from './event.js';
-import { admissionTier, TIER_ACTION, DEFAULT_POLICY } from './trust.js';
-import { KNOCK_KIND, DEFAULT_CATEGORIES, lintKnockBody, tierAtLeast } from './knock.js';
+import { verifyEvent, tagValue } from './event.ts';
+import { admissionTier, TIER_ACTION, DEFAULT_POLICY } from './trust.ts';
+import { KNOCK_KIND, DEFAULT_CATEGORIES, lintKnockBody, tierAtLeast } from './knock.ts';
+import type { KnockCategories } from './knock.ts';
+import type { Proofs, Tier, TrustPolicy } from './trust.ts';
+import type { VouchGraph } from './vouch.ts';
 
 const DAY = 86400;
 
-export const DEFAULT_GATE_POLICY = Object.freeze({
+export interface GatePolicy extends TrustPolicy {
+  maxEventBytes: number;
+  perSenderPerDay: Record<Tier, number>;
+  categories: KnockCategories;
+}
+export type GatePolicyInput = Partial<Omit<GatePolicy, 'perSenderPerDay'>> & { perSenderPerDay?: Partial<Record<Tier, number>> };
+
+export interface KnockCard {
+  id: string; sender: string; tier: Tier; why: string[]; category: string;
+  fields: Record<string, string>; hasNote: boolean; at: number;
+}
+export interface GateDecision {
+  action: string;
+  tier: Tier | undefined;
+  reasons: string[];
+  card?: KnockCard;
+  note?: string;
+}
+export interface GateLogEntry {
+  at: number; id: string | null; sender: string | null; action: string; tier: Tier | null; reasons: string[]; category: string | null;
+}
+
+export const DEFAULT_GATE_POLICY: Readonly<GatePolicy> = Object.freeze({
   ...DEFAULT_POLICY,
   maxEventBytes: 4096,
   perSenderPerDay: { A: 50, B: 3, C: 1, D: 0 },
@@ -27,12 +52,20 @@ export const DEFAULT_GATE_POLICY = Object.freeze({
 });
 
 export class Gate {
-  /**
-   * @param {{owner:string, contacts?:Iterable<string>, graph?:import('./vouch.js').VouchGraph,
-   *          proofsFor?:(pubkey:string)=>object, policy?:object}} opts
-   *   proofsFor returns proofs already verified by the home for a sender (none by default).
-   */
-  constructor({ owner, contacts = [], graph, proofsFor = () => ({}), policy = {} }) {
+  owner: string;
+  contacts: Set<string>;
+  graph: Pick<VouchGraph, 'hops' | 'removed'> | null | undefined;
+  proofsFor: (pubkey: string) => Proofs | null | undefined;
+  policy: GatePolicy;
+  seen: Set<string>;
+  counts: Map<string, number>;
+  log: GateLogEntry[];
+
+  /** proofsFor returns proofs already verified by the home for a sender (none by default). */
+  constructor({ owner, contacts = [], graph, proofsFor = () => ({}), policy = {} }: {
+    owner: string; contacts?: Iterable<string>; graph?: Pick<VouchGraph, 'hops' | 'removed'> | null | undefined;
+    proofsFor?: (pubkey: string) => Proofs | null | undefined; policy?: GatePolicyInput;
+  }) {
     this.owner = owner;
     this.contacts = new Set(contacts);
     this.graph = graph;
@@ -47,25 +80,21 @@ export class Gate {
     this.log = [];
   }
 
-  /**
-   * @param {object} e   an incoming event, already unsealed by the transport
-   * @param {number} now seconds
-   * @returns {{action:'inbox'|'knock_card'|'requests'|'drop', tier?:string, reasons:string[],
-   *            card?:object, note?:string}}
-   */
-  receive(e, now = Math.floor(Date.now() / 1000)) {
+  /** e: an incoming event, already unsealed by the transport; now: seconds. */
+  receive(e: unknown, now: number = Math.floor(Date.now() / 1000)): GateDecision {
     const decision = this.#decide(e, now);
+    const ev = e as { id?: unknown; pubkey?: unknown } | null | undefined;
     this.log.push({
-      at: now, id: typeof e?.id === 'string' ? e.id : null, sender: typeof e?.pubkey === 'string' ? e.pubkey : null,
+      at: now, id: typeof ev?.id === 'string' ? ev.id : null, sender: typeof ev?.pubkey === 'string' ? ev.pubkey : null,
       action: decision.action, tier: decision.tier ?? null, reasons: decision.reasons,
       category: decision.card?.category ?? null,
     });
     return decision;
   }
 
-  #decide(e, now) {
-    const drop = (reasons, tier) => ({ action: 'drop', tier, reasons });
-    let size;
+  #decide(e: unknown, now: number): GateDecision {
+    const drop = (reasons: string[], tier?: Tier): GateDecision => ({ action: 'drop', tier, reasons });
+    let size: number;
     try { size = Buffer.byteLength(JSON.stringify(e)); } catch { return drop(['not serialisable']); }
     if (size > this.policy.maxEventBytes) return drop([`larger than ${this.policy.maxEventBytes} bytes`]);
     if (!verifyEvent(e)) return drop(['bad signature or format']);
@@ -81,12 +110,12 @@ export class Gate {
     });
     if (t.tier === 'D') return drop(t.reasons, 'D');
 
-    let body;
+    let body: { category: string; fields?: Record<string, string>; note?: string };
     try { body = JSON.parse(e.content); } catch { return drop(['content is not JSON'], t.tier); }
     const problems = lintKnockBody(body, this.policy.categories);
     if (problems.length) return drop(problems, t.tier);
     if (tagValue(e, 'category') !== body.category) return drop(['category tag does not match body'], t.tier);
-    const cat = this.policy.categories[body.category];
+    const cat = this.policy.categories[body.category]!; // lintKnockBody refused unknown categories
     if (!tierAtLeast(t.tier, cat.minTier)) {
       return drop([`${body.category} needs tier ${cat.minTier}; sender is tier ${t.tier}`], t.tier);
     }

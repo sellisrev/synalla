@@ -16,7 +16,7 @@ import {
   createInvite, redeemInvite, acceptRedemption, VouchGraph, admissionTier,
   RecordStore, publishRound, progressCard, personalView, ladder,
   createOffer, judgeOffer,
-} from '../src/index.js';
+} from '../src/index.ts';
 
 const WEEKS = Number(process.argv[2] ?? 8);
 let seed = Number(process.argv[3] ?? 11);

@@ -6,3 +6,4 @@ internal/
 reports/
 .stryker-tmp/
 reports_*.log
+dist/

@@ -6,7 +6,7 @@
 // Prints one CSV line for scoring_sheet.csv: id, record_found, fields_valid, role_ok, seniority_ok,
 // region_ok, company_type_ok, value_within_1000, identity_leaked, leaked_tokens
 import { readFileSync } from 'node:fs';
-import { RecordStore } from '../../src/pool.js';
+import { RecordStore } from '../../src/pool.ts';
 
 const [id, file] = process.argv.slice(2);
 if (!id || !file) { console.error('usage: node score.mjs <payslip-id> <reply.txt>'); process.exit(2); }

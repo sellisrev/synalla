@@ -19,24 +19,24 @@ Early. This repository holds the rules that don't depend on any one host or tran
 
 | Module | What it does |
 |---|---|
-| `src/event.js` | Nostr-compatible keys and signed events |
-| `src/vouch.js` | Invites that become vouches, and a web of trust with accountability |
-| `src/trust.js` | Admission tiers for first contacts, decided by code before any model reads anything |
-| `src/pool.js` | Group answers that unlock at a threshold, with rounds and a differencing check |
-| `src/offers.js` | Signed offers and private judging against the owner's limits |
-| `src/knock.js`, `src/gate.js` | Typed first contact, and the home's gate that routes it by tier, category and daily limits |
-| `src/seal.js` | Sealed mail: NIP-44 v2 encryption and NIP-59 gift wrap, checked against the official test vectors |
-| `src/decisions.js` | Remembered decisions: the owner's yes, no or not now, applied to similar offers for years, with the most specific decision winning |
-| `src/askaround.js` | Asking around: a need published without who wants it, offers checked one per seller, ranked against the owner's private budget and past refusals |
-| `src/wants.js` | Spotted wants: act on very likely ones, ask the owner about the middle, drop unlikely ones, and learn the owner's cut-off from their answers |
-| `src/inbox.js` | The signed inbox list (NIP-17 kind 10050): which relays hold an agent's mail, and which ones a sender writes to |
-| `src/circle.js` | A convener's kit: single-use invite links (code kept in the URL fragment) and shareable progress cards |
+| `src/event.ts` | Nostr-compatible keys and signed events |
+| `src/vouch.ts` | Invites that become vouches, and a web of trust with accountability |
+| `src/trust.ts` | Admission tiers for first contacts, decided by code before any model reads anything |
+| `src/pool.ts` | Group answers that unlock at a threshold, with rounds and a differencing check |
+| `src/offers.ts` | Signed offers and private judging against the owner's limits |
+| `src/knock.ts`, `src/gate.ts` | Typed first contact, and the home's gate that routes it by tier, category and daily limits |
+| `src/seal.ts` | Sealed mail: NIP-44 v2 encryption and NIP-59 gift wrap, checked against the official test vectors |
+| `src/decisions.ts` | Remembered decisions: the owner's yes, no or not now, applied to similar offers for years, with the most specific decision winning |
+| `src/askaround.ts` | Asking around: a need published without who wants it, offers checked one per seller, ranked against the owner's private budget and past refusals |
+| `src/wants.ts` | Spotted wants: act on very likely ones, ask the owner about the middle, drop unlikely ones, and learn the owner's cut-off from their answers |
+| `src/inbox.ts` | The signed inbox list (NIP-17 kind 10050): which relays hold an agent's mail, and which ones a sender writes to |
+| `src/circle.ts` | A convener's kit: single-use invite links (code kept in the URL fragment) and shareable progress cards |
 
 Nothing here publishes to public relays or handles real data. See [docs/limits.md](docs/limits.md).
 
 ## Try it
 
-Requires Node 22 or later.
+Requires Node 22.18 or later (it runs the TypeScript sources directly). `npm run check` typechecks and runs the tests; `npm run build` writes `dist/` for packaging.
 
 ```
 npm install --ignore-scripts

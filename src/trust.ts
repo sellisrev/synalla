@@ -16,11 +16,18 @@
 // of the people the owner follows reaches tier C, never higher on that alone. Follows are cheap
 // to fake, but faking this one means getting accounts the owner chose to follow to follow you.
 
-import { verifyEvent } from './event.js';
+import { verifyEvent } from './event.ts';
+import type { NostrEvent } from './event.ts';
+import type { VouchGraph } from './vouch.ts';
 
-export const TIER_ACTION = Object.freeze({ A: 'inbox', B: 'knock_card', C: 'requests', D: 'drop' });
+export type Tier = 'A' | 'B' | 'C' | 'D';
+export interface TierResult { tier: Tier; action: string; reasons: string[] }
+export interface Proofs { personhood?: boolean; accountAgeDays?: number; deposit?: boolean; followedBy?: number }
+export interface TrustPolicy { maxHopsA: number; maxHopsB: number; dailyCapC: number; minAccountAgeDays: number; minFollowedBy: number }
 
-export const DEFAULT_POLICY = Object.freeze({
+export const TIER_ACTION: Readonly<Record<Tier, string>> = Object.freeze({ A: 'inbox', B: 'knock_card', C: 'requests', D: 'drop' });
+
+export const DEFAULT_POLICY: Readonly<TrustPolicy> = Object.freeze({
   maxHopsA: 1, // vouch hops from {owner, contacts} that still count as tier A
   maxHopsB: 2,
   dailyCapC: 3, // tier C knocks shown per day, across all senders
@@ -34,14 +41,14 @@ export const DEFAULT_POLICY = Object.freeze({
  * @param {object[]} followLists kind-3 events (the owner's and the owner's follows')
  * @returns {number}
  */
-export function followedByFollows(followLists, owner, sender) {
-  const latest = new Map();
+export function followedByFollows(followLists: Iterable<unknown>, owner: string, sender: string): number {
+  const latest = new Map<string, NostrEvent>();
   for (const e of followLists) {
-    if (e?.kind !== 3 || !verifyEvent(e)) continue;
+    if ((e as { kind?: unknown } | null | undefined)?.kind !== 3 || !verifyEvent(e)) continue;
     const prev = latest.get(e.pubkey);
     if (!prev || e.created_at > prev.created_at || (e.created_at === prev.created_at && e.id > prev.id)) latest.set(e.pubkey, e);
   }
-  const follows = e => new Set((e?.tags ?? []).filter(t => t[0] === 'p' && /^[0-9a-f]{64}$/.test(t[1] ?? '')).map(t => t[1]));
+  const follows = (e: NostrEvent | undefined): Set<string> => new Set((e?.tags ?? []).filter(t => t[0] === 'p' && /^[0-9a-f]{64}$/.test(t[1] ?? '')).map(t => t[1] as string));
   const mine = follows(latest.get(owner));
   mine.delete(sender);
   mine.delete(owner);
@@ -62,10 +69,13 @@ export function followedByFollows(followLists, owner, sender) {
  * @param {object} [p.policy]
  * @returns {{tier:'A'|'B'|'C'|'D', action:string, reasons:string[]}}
  */
-export function admissionTier({ owner, contacts = [], graph, sender, proofs = {}, policy = {} }) {
-  const pol = { ...DEFAULT_POLICY, ...policy };
+export function admissionTier({ owner, contacts = [], graph, sender, proofs = {}, policy = {} }: {
+  owner: string; contacts?: Iterable<string>; graph?: Pick<VouchGraph, 'hops' | 'removed'> | null | undefined;
+  sender: string; proofs?: Proofs; policy?: Partial<TrustPolicy>;
+}): TierResult {
+  const pol: TrustPolicy = { ...DEFAULT_POLICY, ...policy };
   const contactSet = new Set(contacts);
-  const reasons = [];
+  const reasons: string[] = [];
   if (graph?.removed?.has(sender)) return result('D', ['sender was removed from the network']);
   if (sender === owner || contactSet.has(sender)) return result('A', ['existing contact']);
 
@@ -82,7 +92,7 @@ export function admissionTier({ owner, contacts = [], graph, sender, proofs = {}
   if ((proofs.followedBy ?? 0) >= pol.minFollowedBy) return result('C', [`followed by ${proofs.followedBy} accounts you follow`]);
   return result('D', ['no contact, vouch or proof']);
 
-  function result(tier, why) {
+  function result(tier: Tier, why: string[]): TierResult {
     return { tier, action: TIER_ACTION[tier], reasons: why };
   }
 }

@@ -17,41 +17,49 @@
 //   missed score).
 // The act level stays fixed: wants acted on alone are not asked about, so there is no answer to learn from.
 
-const DEFAULTS = { act: 0.9, floor: 0.2, step: 0.05, minFloor: 0.05, maxFloor: 0.6, window: 8, minYes: 0.25, keep: 200 };
+import type { Result } from './result.ts';
 
-function isPlain(v) { return v !== null && typeof v === 'object' && Object.getPrototypeOf(v) === Object.prototype; }
-function isScore(v) { return typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1; }
-function isTime(v) { return Number.isSafeInteger(v) && v >= 0; }
-function round(v) { return Math.round(v * 1000) / 1000; }
-function copy(state) {
+export interface WantOptions { act: number; floor: number; step: number; minFloor: number; maxFloor: number; window: number; minYes: number; keep: number }
+export interface WantAnswer { score: number; yes: boolean; at: number }
+export interface FloorChange { at: number; from: number; to: number; reason: string }
+export type WantState = WantOptions & { version: 1; answers: WantAnswer[]; changes: FloorChange[] };
+export type WantRoute = 'act' | 'confirm' | 'drop';
+
+const DEFAULTS: WantOptions = { act: 0.9, floor: 0.2, step: 0.05, minFloor: 0.05, maxFloor: 0.6, window: 8, minYes: 0.25, keep: 200 };
+
+function isPlain(v: unknown): v is Record<string, unknown> { return v !== null && typeof v === 'object' && Object.getPrototypeOf(v) === Object.prototype; }
+function isScore(v: unknown): v is number { return typeof v === 'number' && Number.isFinite(v) && v >= 0 && v <= 1; }
+function isTime(v: unknown): v is number { return Number.isSafeInteger(v) && (v as number) >= 0; }
+function round(v: number): number { return Math.round(v * 1000) / 1000; }
+function copy(state: WantState): WantState {
   return { ...state, answers: state.answers.map(a => ({ ...a })), changes: state.changes.map(c => ({ ...c })) };
 }
 
 // probs: the decision model's probabilities over want categories plus "none".
-export function wantScore(probs) {
+export function wantScore(probs: unknown): Result<{ score: number }> {
   if (!isPlain(probs) || !isScore(probs.none)) return { ok: false, errors: ['probs must be an object with a "none" probability'] };
   return { ok: true, score: round(1 - probs.none) };
 }
 
-export function createWantGate(options = {}) {
+export function createWantGate(options: unknown = {}): Result<{ state: WantState }> {
   if (!isPlain(options)) return { ok: false, errors: ['options must be a plain object'] };
   for (const k of Object.keys(options)) if (!(k in DEFAULTS)) return { ok: false, errors: ['unknown option: ' + k] };
-  const o = { ...DEFAULTS, ...options };
-  for (const k of ['act', 'floor', 'step', 'minFloor', 'maxFloor', 'minYes']) if (!isScore(o[k])) return { ok: false, errors: [k + ' must be in 0..1'] };
-  for (const k of ['window', 'keep']) if (!Number.isSafeInteger(o[k]) || o[k] < 1) return { ok: false, errors: [k + ' must be a positive integer'] };
+  const o = { ...DEFAULTS, ...options } as WantOptions; // checked field by field below
+  for (const k of ['act', 'floor', 'step', 'minFloor', 'maxFloor', 'minYes'] as const) if (!isScore(o[k])) return { ok: false, errors: [k + ' must be in 0..1'] };
+  for (const k of ['window', 'keep'] as const) if (!Number.isSafeInteger(o[k]) || o[k] < 1) return { ok: false, errors: [k + ' must be a positive integer'] };
   if (!(o.minFloor <= o.floor && o.floor <= o.maxFloor && o.maxFloor < o.act)) return { ok: false, errors: ['need minFloor <= floor <= maxFloor < act'] };
   if (o.step <= 0) return { ok: false, errors: ['step must be above 0'] };
-  return { ok: true, state: { version: 1, ...o, answers: [], changes: [] } };
+  return { ok: true, state: { version: 1 as const, ...o, answers: [], changes: [] } };
 }
 
 // 'act': go ahead (for example, draft an ask-around). 'confirm': ask the owner first. 'drop': let it go.
-export function routeWant(state, score) {
+export function routeWant(state: WantState, score: unknown): Result<{ route: WantRoute }> {
   if (!isScore(score)) return { ok: false, errors: ['score must be in 0..1'] };
-  const route = score >= state.act ? 'act' : score >= state.floor ? 'confirm' : 'drop';
+  const route: WantRoute = score >= state.act ? 'act' : score >= state.floor ? 'confirm' : 'drop';
   return { ok: true, route };
 }
 
-function change(state, floor, at, reason) {
+function change(state: WantState, floor: number, at: number, reason: string): WantState {
   floor = round(Math.min(state.maxFloor, Math.max(state.minFloor, floor)));
   if (floor === state.floor) return state;
   state.changes.push({ at, from: state.floor, to: floor, reason });
@@ -60,7 +68,7 @@ function change(state, floor, at, reason) {
 }
 
 // The owner's answer to a confirmation: yes = it was a real want.
-export function recordAnswer(state, answer) {
+export function recordAnswer(state: WantState, answer: unknown): Result<{ state: WantState }> {
   if (!isPlain(answer)) return { ok: false, errors: ['answer must be a plain object'] };
   if (!isScore(answer.score)) return { ok: false, errors: ['score must be in 0..1'] };
   if (typeof answer.yes !== 'boolean') return { ok: false, errors: ['yes must be true or false'] };
@@ -68,7 +76,7 @@ export function recordAnswer(state, answer) {
   const s = copy(state);
   s.answers.push({ score: answer.score, yes: answer.yes, at: answer.at });
   if (s.answers.length > s.keep) s.answers = s.answers.slice(-s.keep);
-  const since = s.changes.length ? s.changes[s.changes.length - 1].at : -1;
+  const since = s.changes.length ? s.changes[s.changes.length - 1]!.at : -1;
   const low = s.answers.filter(a => a.at > since && a.score >= s.floor && a.score < s.act)
     .sort((a, b) => a.score - b.score).slice(0, s.window);
   if (low.length === s.window && low.filter(a => a.yes).length / s.window < s.minYes)
@@ -77,7 +85,7 @@ export function recordAnswer(state, answer) {
 }
 
 // The owner wanted something the agent had dropped, with this score.
-export function recordMiss(state, miss) {
+export function recordMiss(state: WantState, miss: unknown): Result<{ state: WantState }> {
   if (!isPlain(miss)) return { ok: false, errors: ['miss must be a plain object'] };
   if (!isScore(miss.score)) return { ok: false, errors: ['score must be in 0..1'] };
   if (!isTime(miss.at)) return { ok: false, errors: ['at must be a time'] };

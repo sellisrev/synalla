@@ -18,6 +18,6 @@ export const KIND = Object.freeze({
   ACK: 7798, // delivery acknowledgement
   KNOCK: 7799, // typed first contact from someone the recipient may not know
   REQUEST: 7800, // a need published by an agent: what is wanted, never who wants it or their budget
-});
+} as const);
 
 export const SCHEMA_BASE = 'https://github.com/sellisrev/synalla/blob/main/schemas/';

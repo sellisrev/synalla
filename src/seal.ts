@@ -18,7 +18,11 @@ import { extract, expand } from '@noble/hashes/hkdf.js';
 import { hmac } from '@noble/hashes/hmac.js';
 import { sha256 } from '@noble/hashes/sha2.js';
 import { hexToBytes, bytesToHex, concatBytes } from '@noble/hashes/utils.js';
-import { generateSecretKey, getPublicKey, signEvent, verifyEvent, eventId, nowSeconds } from './event.js';
+import { generateSecretKey, getPublicKey, signEvent, verifyEvent, eventId, nowSeconds } from './event.ts';
+import type { EventTemplate, NostrEvent, UnsignedEvent } from './event.ts';
+
+/** An event with an id and the sender's key but no signature (NIP-59); a signed event also qualifies. */
+export type Rumor = UnsignedEvent & { id: string; sig?: string };
 
 const enc = new TextEncoder();
 const dec = new TextDecoder('utf-8', { fatal: true });
@@ -28,19 +32,19 @@ export const WRAP_KIND = 1059;
 
 // ---- NIP-44 v2 ------------------------------------------------------------------------------
 
-export function getConversationKey(secretKeyHex, publicKeyHex) {
+export function getConversationKey(secretKeyHex: string, publicKeyHex: string): Uint8Array {
   const shared = secp256k1.getSharedSecret(hexToBytes(secretKeyHex), hexToBytes('02' + publicKeyHex));
   return extract(sha256, shared.subarray(1, 33), SALT);
 }
 
-export function getMessageKeys(conversationKey, nonce) {
+export function getMessageKeys(conversationKey: Uint8Array, nonce: Uint8Array): { chachaKey: Uint8Array; chachaNonce: Uint8Array; hmacKey: Uint8Array } {
   if (conversationKey.length !== 32) throw new Error('conversation key must be 32 bytes');
   if (nonce.length !== 32) throw new Error('nonce must be 32 bytes');
   const keys = expand(sha256, conversationKey, nonce, 76);
   return { chachaKey: keys.subarray(0, 32), chachaNonce: keys.subarray(32, 44), hmacKey: keys.subarray(44, 76) };
 }
 
-export function calcPaddedLen(len) {
+export function calcPaddedLen(len: number): number {
   if (!Number.isInteger(len) || len < 1) throw new Error('expected a positive integer');
   if (len <= 32) return 32;
   const nextPower = 1 << (Math.floor(Math.log2(len - 1)) + 1);
@@ -48,7 +52,7 @@ export function calcPaddedLen(len) {
   return chunk * (Math.floor((len - 1) / chunk) + 1);
 }
 
-function pad(text) {
+function pad(text: string): Uint8Array {
   const bytes = enc.encode(text);
   const len = bytes.length;
   if (len < 1 || len > 65535) throw new Error('plaintext must be 1 to 65535 bytes');
@@ -59,33 +63,33 @@ function pad(text) {
   return out;
 }
 
-function unpad(padded) {
-  const len = (padded[0] << 8) | padded[1];
+function unpad(padded: Uint8Array): string {
+  const len = (padded[0]! << 8) | padded[1]!;
   const body = padded.subarray(2, 2 + len);
   if (len === 0 || body.length !== len || padded.length !== 2 + calcPaddedLen(len)) throw new Error('invalid padding');
   return dec.decode(body);
 }
 
-function chacha20(key, nonce12, data) {
+function chacha20(key: Uint8Array, nonce12: Uint8Array, data: Uint8Array): Uint8Array {
   const iv = new Uint8Array(16);
   iv.set(nonce12, 4); // OpenSSL's chacha20 IV: 32-bit little-endian counter (0), then the 96-bit nonce
   const c = createCipheriv('chacha20', key, iv);
   return new Uint8Array(Buffer.concat([c.update(data), c.final()]));
 }
 
-function hmacAad(key, message, aad) {
+function hmacAad(key: Uint8Array, message: Uint8Array, aad: Uint8Array): Uint8Array {
   if (aad.length !== 32) throw new Error('AAD associated data must be 32 bytes');
   return hmac(sha256, key, concatBytes(aad, message));
 }
 
-export function encrypt(plaintext, conversationKey, nonce = globalThis.crypto.getRandomValues(new Uint8Array(32))) {
+export function encrypt(plaintext: string, conversationKey: Uint8Array, nonce: Uint8Array = globalThis.crypto.getRandomValues(new Uint8Array(32))): string {
   const { chachaKey, chachaNonce, hmacKey } = getMessageKeys(conversationKey, nonce);
   const ciphertext = chacha20(chachaKey, chachaNonce, pad(plaintext));
   const mac = hmacAad(hmacKey, ciphertext, nonce);
   return Buffer.from(concatBytes(new Uint8Array([2]), nonce, ciphertext, mac)).toString('base64');
 }
 
-export function decrypt(payload, conversationKey) {
+export function decrypt(payload: string, conversationKey: Uint8Array): string {
   if (typeof payload !== 'string') throw new Error('payload must be a string');
   const plen = payload.length;
   if (plen === 0 || payload[0] === '#') throw new Error('unknown encryption version');
@@ -107,23 +111,22 @@ export function decrypt(payload, conversationKey) {
 // ---- NIP-59 gift wrap -----------------------------------------------------------------------
 
 const TWO_DAYS = 2 * 86400;
-function fuzzyTime(now) {
+function fuzzyTime(now: number): number {
   const r = new Uint32Array(1);
   globalThis.crypto.getRandomValues(r);
-  return now - (r[0] % TWO_DAYS);
+  return now - (r[0]! % TWO_DAYS);
 }
 
 /** Turn an event template into a rumor: an event with an id and the sender's key, without a signature. */
-export function makeRumor(template, senderPubkey) {
-  const r = {
+export function makeRumor(template: EventTemplate, senderPubkey: string): Rumor {
+  const r: UnsignedEvent = {
     pubkey: senderPubkey,
     created_at: template.created_at ?? nowSeconds(),
     kind: template.kind,
     tags: template.tags ?? [],
     content: template.content ?? '',
   };
-  r.id = eventId(r);
-  return r;
+  return Object.assign(r, { id: eventId(r) });
 }
 
 /**
@@ -132,7 +135,7 @@ export function makeRumor(template, senderPubkey) {
  * @param {string} senderSk
  * @param {string} recipientPubkey
  */
-export function giftWrap(inner, senderSk, recipientPubkey, { now = nowSeconds() } = {}) {
+export function giftWrap(inner: Rumor, senderSk: string, recipientPubkey: string, { now = nowSeconds() }: { now?: number } = {}): NostrEvent {
   if (inner.pubkey !== getPublicKey(senderSk)) throw new Error('inner event must carry the sender key');
   const seal = signEvent({
     kind: SEAL_KIND,
@@ -153,12 +156,12 @@ export function giftWrap(inner, senderSk, recipientPubkey, { now = nowSeconds() 
  * Open a gift wrap addressed to us. Throws on anything that doesn't check out.
  * @returns {{sender:string, inner:object, signedInner:boolean}}
  */
-export function unwrap(wrap, recipientSk) {
+export function unwrap(wrap: unknown, recipientSk: string): { sender: string; inner: Rumor; signedInner: boolean } {
   if (!verifyEvent(wrap) || wrap.kind !== WRAP_KIND) throw new Error('not a valid gift wrap');
-  const seal = JSON.parse(decrypt(wrap.content, getConversationKey(recipientSk, wrap.pubkey)));
+  const seal: unknown = JSON.parse(decrypt(wrap.content, getConversationKey(recipientSk, wrap.pubkey)));
   if (!verifyEvent(seal) || seal.kind !== SEAL_KIND) throw new Error('not a valid seal');
   if (seal.tags.length) throw new Error('seal must have no tags');
-  const inner = JSON.parse(decrypt(seal.content, getConversationKey(recipientSk, seal.pubkey)));
+  const inner: Rumor = JSON.parse(decrypt(seal.content, getConversationKey(recipientSk, seal.pubkey)));
   if (!inner || inner.pubkey !== seal.pubkey) throw new Error('inner event claims another sender');
   if (inner.id !== eventId(inner)) throw new Error('inner event id does not match');
   const signedInner = typeof inner.sig === 'string';

@@ -5,9 +5,10 @@
     "command": "node tools/mutation-test.mjs"
   },
   "mutate": [
-    "src/**/*.js",
-    "!src/index.js",
-    "!src/kinds.js"
+    "src/**/*.ts",
+    "!src/index.ts",
+    "!src/kinds.ts",
+    "!src/result.ts"
   ],
   "concurrency": 6,
   "timeoutMS": 20000,
@@ -24,5 +25,6 @@
     "fileName": "reports/mutation/index.html"
   },
   "tempDirName": ".stryker-tmp",
-  "cleanTempDir": "always"
+  "cleanTempDir": "always",
+  "disableTypeChecks": "src/**/*.ts"
 }

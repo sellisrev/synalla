@@ -89,19 +89,19 @@ A network built on several people's private facts is worth nothing to its first 
 ## What is in this repository now
 | Module | What it does |
 |---|---|
-| `src/event.js` | Keys, signing and verification of NIP-01 events |
-| `src/vouch.js` | Invites that become vouches; the web of trust with strikes, suspensions and branch cuts |
-| `src/trust.js` | Admission tiers A-D for first contacts, from contacts, vouch distance and proofs |
-| `src/pool.js` | Group answers that unlock at k, the broadening ladder, rounds, the differencing check, progress cards and personal views |
-| `src/offers.js` | Signed offers, derived offers from public ads, and private judging against the owner's limits |
-| `src/knock.js` | Typed first contact: categories, fields, a short note with no links, contacts or handles |
-| `src/gate.js` | The home's gate: verifies, tiers, checks the category's minimum tier and daily limits, logs every decision |
-| `src/seal.js` | NIP-44 v2 encryption and NIP-59 gift wrap for first-contact mail |
-| `src/decisions.js` | Remembered decisions on offers: scopes from one offer to a whole category, expiry, lifting, precedence |
-| `src/askaround.js` | Asking around: privacy-checked requests (no links, contacts, private terms or budget), offer validation, ranking with suppression by remembered decisions |
-| `src/wants.js` | The want gate: act at score 0.9 or more, ask the owner from the floor (default 0.2), drop below; the floor rises when the lowest confirmations are mostly "no" and falls when the owner wanted something that was dropped |
-| `src/inbox.js` | Signed inbox lists (kind 10050) and the sender's delivery plan |
-| `src/circle.js` | Invite links for a convener's circle and progress cards to share |
+| `src/event.ts` | Keys, signing and verification of NIP-01 events |
+| `src/vouch.ts` | Invites that become vouches; the web of trust with strikes, suspensions and branch cuts |
+| `src/trust.ts` | Admission tiers A-D for first contacts, from contacts, vouch distance and proofs |
+| `src/pool.ts` | Group answers that unlock at k, the broadening ladder, rounds, the differencing check, progress cards and personal views |
+| `src/offers.ts` | Signed offers, derived offers from public ads, and private judging against the owner's limits |
+| `src/knock.ts` | Typed first contact: categories, fields, a short note with no links, contacts or handles |
+| `src/gate.ts` | The home's gate: verifies, tiers, checks the category's minimum tier and daily limits, logs every decision |
+| `src/seal.ts` | NIP-44 v2 encryption and NIP-59 gift wrap for first-contact mail |
+| `src/decisions.ts` | Remembered decisions on offers: scopes from one offer to a whole category, expiry, lifting, precedence |
+| `src/askaround.ts` | Asking around: privacy-checked requests (no links, contacts, private terms or budget), offer validation, ranking with suppression by remembered decisions |
+| `src/wants.ts` | The want gate: act at score 0.9 or more, ask the owner from the floor (default 0.2), drop below; the floor rises when the lowest confirmations are mostly "no" and falls when the owner wanted something that was dropped |
+| `src/inbox.ts` | Signed inbox lists (kind 10050) and the sender's delivery plan |
+| `src/circle.ts` | Invite links for a convener's circle and progress cards to share |
 | `schemas/` | JSON Schemas for the objects above |
 
 Everything else in the tables above is design, not code yet.

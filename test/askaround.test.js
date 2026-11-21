@@ -9,7 +9,7 @@ import path from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { makeScenario, runScenario, GOLDEN_SEEDS, verify } from './fixtures/askaround/scenarios.mjs';
 
-const implPath = path.join(import.meta.dirname, '..', 'src', 'askaround.js');
+const implPath = ['askaround.ts', 'askaround.js'].map(f => path.join(import.meta.dirname, '..', 'src', f)).find(f => fs.existsSync(f));
 const impl = await import(pathToFileURL(implPath).href);
 const { buildRequest, collectOffers, rankOffers } = impl;
 const DAY = 86400;

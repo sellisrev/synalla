@@ -9,24 +9,32 @@
 // as derived and keep their source, so they are never shown as if a person or company had
 // published them on the network.
 
-import { signEvent, verifyEvent, tagValue } from './event.js';
-import { KIND } from './kinds.js';
+import { signEvent, verifyEvent, tagValue } from './event.ts';
+import type { NostrEvent } from './event.ts';
+import { KIND } from './kinds.ts';
 
-const OFFER_TYPES = ['job', 'sale', 'tender', 'service'];
+export type OfferType = 'job' | 'sale' | 'tender' | 'service';
+export type PayPeriod = 'year' | 'month' | 'hour';
+export interface OfferSource { kind: 'direct' | 'public_ad'; url?: string; retrievedAt?: string }
+export interface OfferInput {
+  type: OfferType; title: string; role?: string; region?: string; payMin?: number | null; payMax?: number | null;
+  currency?: string; period?: PayPeriod; expiresAt?: number; source?: OfferSource;
+}
+/** An offer as read back from its event: the body, plus who signed it and whether it was derived from an ad. */
+export type ReadOffer = OfferInput & { source: OfferSource; derived: boolean; signer: string; id: string };
+export interface OfferLimits { floor?: number | null; currency?: string; period?: PayPeriod; roles?: string[]; regions?: string[] }
+export type OfferFit = 'above_floor' | 'straddles_floor' | 'below_floor' | 'no_pay_stated' | 'not_relevant' | 'invalid';
 
-/**
- * @param {string} sk  signer: the company itself, or whoever derived the offer from a public ad
- * @param {{type:string, title:string, role?:string, region?:string, payMin?:number, payMax?:number,
- *          currency?:string, period?:'year'|'month'|'hour', expiresAt?:number,
- *          source?:{kind:'direct'|'public_ad', url?:string, retrievedAt?:string}}} o
- */
-export function createOffer(sk, o, { createdAt } = {}) {
+const OFFER_TYPES: string[] = ['job', 'sale', 'tender', 'service'];
+
+/** sk: the signer, i.e. the company itself, or whoever derived the offer from a public ad. */
+export function createOffer(sk: string, o: OfferInput, { createdAt }: { createdAt?: number | undefined } = {}): NostrEvent {
   if (!OFFER_TYPES.includes(o.type)) throw new RangeError(`type must be one of ${OFFER_TYPES.join(', ')}`);
   if (!o.title) throw new TypeError('title required');
   if (o.payMin != null && o.payMax != null && o.payMin > o.payMax) throw new RangeError('payMin > payMax');
-  const source = o.source ?? { kind: 'direct' };
+  const source: OfferSource = o.source ?? { kind: 'direct' };
   if (source.kind === 'public_ad' && !source.url) throw new TypeError('a derived offer must keep its source url');
-  const tags = [['type', o.type], ['source', source.kind]];
+  const tags: string[][] = [['type', o.type], ['source', source.kind]];
   if (o.role) tags.push(['t', o.role]);
   if (o.region) tags.push(['g', o.region]);
   if (o.expiresAt) tags.push(['expiration', String(o.expiresAt)]);
@@ -34,7 +42,7 @@ export function createOffer(sk, o, { createdAt } = {}) {
   return signEvent({ kind: KIND.OFFER, created_at: createdAt, tags, content }, sk);
 }
 
-export function readOffer(e) {
+export function readOffer(e: unknown): ReadOffer | null {
   if (!verifyEvent(e) || e.kind !== KIND.OFFER) return null;
   try {
     const body = JSON.parse(e.content);
@@ -44,28 +52,24 @@ export function readOffer(e) {
   }
 }
 
-const PER_YEAR = { year: 1, month: 12, hour: 1607 }; // 1607 h: French legal working year (35 h week)
+const PER_YEAR: Record<string, number> = { year: 1, month: 12, hour: 1607 }; // 1607 h: French legal working year (35 h week)
 
-/**
- * Judge an offer against private limits. Pure rules, no model, nothing leaves the home.
- * @param {{floor?:number, currency?:string, period?:'year'|'month'|'hour', roles?:string[], regions?:string[]}} limits
- * @returns {{fit:'above_floor'|'straddles_floor'|'below_floor'|'no_pay_stated'|'not_relevant'|'invalid', reasons:string[]}}
- */
-export function judgeOffer(limits, offerEvent, { now } = {}) {
+/** Judge an offer against private limits. Pure rules, no model, nothing leaves the home. */
+export function judgeOffer(limits: OfferLimits, offerEvent: unknown, { now }: { now?: number | undefined } = {}): { fit: OfferFit; reasons: string[] } {
   const o = readOffer(offerEvent);
   if (!o) return { fit: 'invalid', reasons: ['bad signature or format'] };
-  const reasons = [];
-  const exp = Number(tagValue(offerEvent, 'expiration'));
+  const reasons: string[] = [];
+  const exp = Number(tagValue(offerEvent as NostrEvent, 'expiration'));
   if (exp && (now ?? Math.floor(Date.now() / 1000)) > exp) return { fit: 'not_relevant', reasons: ['expired'] };
-  if (limits.roles?.length && !limits.roles.includes(o.role)) return { fit: 'not_relevant', reasons: ['other role'] };
-  if (limits.regions?.length && !limits.regions.includes(o.region)) return { fit: 'not_relevant', reasons: ['other region'] };
+  if (limits.roles?.length && !limits.roles.includes(o.role as string)) return { fit: 'not_relevant', reasons: ['other role'] };
+  if (limits.regions?.length && !limits.regions.includes(o.region as string)) return { fit: 'not_relevant', reasons: ['other region'] };
   if (o.derived) reasons.push('taken from a public ad');
   if (limits.floor == null) return { fit: 'no_pay_stated', reasons: [...reasons, 'no floor set'] };
   if (o.payMin == null && o.payMax == null) return { fit: 'no_pay_stated', reasons: [...reasons, 'offer states no pay'] };
   if (limits.currency && o.currency && limits.currency !== o.currency) {
     return { fit: 'no_pay_stated', reasons: [...reasons, `different currency (${o.currency})`] };
   }
-  const f = (v, period) => v * PER_YEAR[period ?? 'year'];
+  const f = (v: number, period: string | undefined): number => v * PER_YEAR[period ?? 'year']!;
   const floor = f(limits.floor, limits.period);
   const lo = o.payMin != null ? f(o.payMin, o.period) : null;
   const hi = o.payMax != null ? f(o.payMax, o.period) : lo;

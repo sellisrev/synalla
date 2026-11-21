@@ -7,16 +7,22 @@
 // key, the one-time code, the scope and the expiry. They sit in the URL fragment (after #),
 // which browsers never send to a server, so whatever page hosts the link never sees the code.
 
-import { createInvite } from './vouch.js';
-import { tagValue } from './event.js';
+import { createInvite } from './vouch.ts';
+import { tagValue } from './event.ts';
+import type { NostrEvent } from './event.ts';
 
-const b64url = s => Buffer.from(s, 'utf8').toString('base64url');
-const unb64url = s => Buffer.from(s, 'base64url').toString('utf8');
+/** What progressCardSvg reads from a progress card (pool.ts progressCard). */
+export interface CardFigures { label: string; count: number; k: number; unlocked: boolean; needed: number }
+export interface ParsedInvite { invite: { id: string; pubkey: string }; code: string; scope: string; expiresAt: number }
+export interface CircleInvite { code: string; invite: NostrEvent; link: string }
+
+const b64url = (s: string): string => Buffer.from(s, 'utf8').toString('base64url');
+const unb64url = (s: string): string => Buffer.from(s, 'base64url').toString('utf8');
 const HEX64 = /^[0-9a-f]{64}$/;
 
 export const DEFAULT_LINK_BASE = 'synalla://join';
 
-export function inviteLink(invite, code, { base = DEFAULT_LINK_BASE } = {}) {
+export function inviteLink(invite: Pick<NostrEvent, 'id' | 'pubkey' | 'tags'>, code: string, { base = DEFAULT_LINK_BASE }: { base?: string | undefined } = {}): string {
   const payload = {
     v: 1,
     i: invite.id,
@@ -28,23 +34,23 @@ export function inviteLink(invite, code, { base = DEFAULT_LINK_BASE } = {}) {
   return `${base}#${b64url(JSON.stringify(payload))}`;
 }
 
-/** @returns {{invite:{id:string,pubkey:string}, code:string, scope:string, expiresAt:number}} */
-export function parseInviteLink(link) {
+export function parseInviteLink(link: unknown): ParsedInvite {
   const hash = String(link).split('#')[1];
   if (!hash) throw new Error('link has no invite');
-  let p;
+  let p: { v?: unknown; i?: string; p?: string; c?: unknown; s?: unknown; x?: unknown };
   try { p = JSON.parse(unb64url(hash)); } catch { throw new Error('invite is unreadable'); }
   if (p.v !== 1) throw new Error('unknown invite version');
-  if (!HEX64.test(p.i) || !HEX64.test(p.p)) throw new Error('invite ids are malformed');
+  if (!HEX64.test(String(p.i)) || !HEX64.test(String(p.p))) throw new Error('invite ids are malformed');
   if (typeof p.c !== 'string' || !/^[0-9a-f]{32}$/.test(p.c)) throw new Error('invite code is malformed');
-  return { invite: { id: p.i, pubkey: p.p }, code: p.c, scope: String(p.s ?? ''), expiresAt: Number(p.x) };
+  return { invite: { id: p.i as string, pubkey: p.p as string }, code: p.c, scope: String(p.s ?? ''), expiresAt: Number(p.x) };
 }
 
 /**
  * Create a batch of single-use invites for one circle. The convener's home keeps the result
  * (it holds the codes) and hands out only the links.
  */
-export function createCircle(convenerSk, { scope, size = 10, expiresAt, createdAt, base } = {}) {
+export function createCircle(convenerSk: string, { scope, size = 10, expiresAt, createdAt, base }:
+  { scope?: string; size?: number; expiresAt?: number | undefined; createdAt?: number | undefined; base?: string | undefined } = {}): CircleInvite[] {
   if (!scope) throw new TypeError('scope required (usually the question id)');
   if (!Number.isInteger(size) || size < 1 || size > 500) throw new RangeError('size must be 1..500');
   return Array.from({ length: size }, () => {
@@ -53,13 +59,14 @@ export function createCircle(convenerSk, { scope, size = 10, expiresAt, createdA
   });
 }
 
-const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const ESC: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const esc = (s: unknown): string => String(s).replace(/[&<>"']/g, c => ESC[c]!);
 
 /**
  * A 1200x627 SVG card (the size LinkedIn previews use) from a progress card.
  * It shows the group and its progress only: never who shares it or whether they took part.
  */
-export function progressCardSvg(card, { title = 'Where does your pay stand?', footer = 'Nobody sees your number. Results unlock at ' } = {}) {
+export function progressCardSvg(card: CardFigures, { title = 'Where does your pay stand?', footer = 'Nobody sees your number. Results unlock at ' }: { title?: string; footer?: string } = {}): string {
   const pct = Math.min(1, card.count / card.k);
   const barW = 960;
   const status = card.unlocked ? 'Unlocked' : `${card.needed} more to unlock`;
