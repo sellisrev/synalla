@@ -5,13 +5,19 @@
   "description": "Personal agents that exchange limited private facts and act only when interests align.",
   "license": "AGPL-3.0-only OR LicenseRef-Synalla-Commercial",
   "type": "module",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "node --test \"test/*.test.js\"",
-    "demo": "node examples/cold_start_demo.mjs"
+    "demo": "node examples/cold_start_demo.mjs",
+    "test:mutation": "stryker run"
   },
   "dependencies": {
     "@noble/curves": "2.4.0",
     "@noble/hashes": "2.4.0"
+  },
+  "devDependencies": {
+    "@stryker-mutator/core": "10.1.1"
   }
 }

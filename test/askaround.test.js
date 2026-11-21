@@ -233,7 +233,8 @@ for (const seed of GOLDEN_SEEDS) {
 }
 
 // STATIC-START
-test('file constraints', () => {
+// Skipped only under mutation testing, where Stryker's instrumentation rewrites the source on purpose.
+test('file constraints', { skip: process.env.SYNALLA_MUTATION_RUN === '1' }, () => {
   const raw = fs.readFileSync(implPath, 'utf8');
   const lines = raw.split('\n');
   assert.ok(lines.length <= 300, `at most 300 lines, found ${lines.length}`);

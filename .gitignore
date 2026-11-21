@@ -3,3 +3,6 @@ node_modules/
 *.log
 # Local working notes (research, strategy, test runs); never published
 internal/
+reports/
+.stryker-tmp/
+reports_*.log

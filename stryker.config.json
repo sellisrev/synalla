@@ -1,0 +1,28 @@
+{
+  "$schema": "./node_modules/@stryker-mutator/core/schema/stryker-schema.json",
+  "testRunner": "command",
+  "commandRunner": {
+    "command": "node tools/mutation-test.mjs"
+  },
+  "mutate": [
+    "src/**/*.js",
+    "!src/index.js",
+    "!src/kinds.js"
+  ],
+  "concurrency": 6,
+  "timeoutMS": 20000,
+  "reporters": [
+    "clear-text",
+    "json",
+    "html",
+    "progress"
+  ],
+  "jsonReporter": {
+    "fileName": "reports/mutation/mutation.json"
+  },
+  "htmlReporter": {
+    "fileName": "reports/mutation/index.html"
+  },
+  "tempDirName": ".stryker-tmp",
+  "cleanTempDir": "always"
+}
