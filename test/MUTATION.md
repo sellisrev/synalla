@@ -11,6 +11,8 @@ the exact behaviour, or listed below as equivalent (no input can tell it apart) 
 | Module | 21 Nov 2026 baseline | Now |
 |---|---:|---:|
 | seal.js | 67% | 94% (all remaining survivors accepted below) |
+| trust.js | 63% | 95% (all remaining survivors accepted below) |
+| gate.js | 68% | 100% |
 | all files | 75.7% | (rerun pending) |
 
 ## Accepted survivors
@@ -24,3 +26,9 @@ the exact behaviour, or listed below as equivalent (no input can tell it apart) 
 - L77 AAD length guard: `hmacAad` is only called with the 32-byte nonce sliced from the payload. Unreachable.
 - L96 data-size bounds: the payload-size check (132–87472 base64 chars) already bounds the decoded size to 99–65603.
   Unreachable through `decrypt`; kept as defence in depth.
+
+### trust.js
+- L42 `e.id > prev.id` → `>=`: two different events never share an id. Equivalent.
+- L44 the p-tag filter (`?? []`, both regex anchors, the default): the count tests exact membership of the sender's
+  key, so malformed tags can never match it either way. Equivalent.
+- L65 default `contacts = []` → a placeholder array: it can never contain a real public key. Equivalent.
