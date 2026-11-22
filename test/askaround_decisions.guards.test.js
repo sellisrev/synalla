@@ -1,7 +1,7 @@
 // SPDX-FileCopyrightText: 2026 Serge Versillé
 // SPDX-License-Identifier: AGPL-3.0-only OR LicenseRef-Synalla-Commercial
 
-// Guard tests for src/askaround.js and src/decisions.js, written from mutation testing (test/MUTATION.md):
+// Guard tests for src/askaround.ts and src/decisions.ts, written from mutation testing (test/MUTATION.md):
 // each test pins a check that could be deleted or loosened without any other test failing.
 // Expected values are worked out by hand from the spec, not copied from the implementation's output.
 import { test } from 'node:test';
@@ -20,6 +20,7 @@ const err = (r, ...errors) => assert.deepEqual(r, { ok: false, errors });
 test('buildRequest: a non-plain object is refused as such, not as missing keys', () => {
   err(buildRequest(new Date()), 'need not plain');
   err(buildRequest(new Map()), 'need not plain');
+  err(buildRequest(null), 'need not plain');
 });
 
 test('buildRequest: each required key on its own', () => {
@@ -99,6 +100,23 @@ test('collectOffers: content limits at their edges', () => {
   for (const currency of ['EURO', 'XEUR', 'eur']) assert.deepEqual(reasons(collect([ev('a1', {}, { currency })])), ['bad_content'], currency);
   assert.deepEqual(reasons(collect([ev('a1', {}, { url: 'http://shop.example' })])), ['bad_content']);
   assert.equal(collect([ev('a1', {}, { url: 'https://shop.example' })]).offers[0].url, 'https://shop.example');
+  const long = 'https://shop.example/' + 'a'.repeat(300 - 21);
+  assert.equal(collect([ev('a1', {}, { url: long })]).offers.length, 1);
+  assert.deepEqual(reasons(collect([ev('a1', {}, { url: long + 'a' })])), ['bad_content']);
+});
+
+test('collectOffers: a url that is not a string is refused, not a crash', () => {
+  // Found by the TS mutation run (22 Nov 2026): without the type check, startsWith on a number or null throws.
+  for (const url of [42, null, ['https://x'], { href: 'https://x' }]) {
+    assert.deepEqual(reasons(collect([ev('a1', {}, { url })])), ['bad_content'], JSON.stringify(url));
+  }
+});
+
+test('undefined where a plain object is needed is refused, not a crash', () => {
+  // Found by the TS mutation run (22 Nov 2026): without the typeof check, Object.getPrototypeOf(undefined) throws.
+  err(buildRequest(undefined), 'need not plain');
+  err(rankOffers([undefined], {}), 'bad offer');
+  err(rankOffers([], undefined), 'bad limits');
 });
 
 test('collectOffers: the same event received twice yields one offer and one superseded copy', () => {
@@ -108,9 +126,12 @@ test('collectOffers: the same event received twice yields one offer and one supe
   assert.deepEqual(r.rejected, [{ index: 1, id: 'a1', reason: 'superseded' }]);
 });
 
+const SHUFFLED = ['e5', 'b2', 'g7', 'a1', 'f6', 'c3', 'd4']; // fixed, so a broken comparator can't pass by luck
 test('collectOffers: offers come out sorted by id whatever the arrival order', () => {
-  const r = collect([ev('c3', { pubkey: S('c') }), ev('a1', { pubkey: S('a') }), ev('b2', { pubkey: S('b') })]);
-  assert.deepEqual(r.offers.map(o => o.id), ['a1', 'b2', 'c3']);
+  const r = collect(SHUFFLED.map((id, i) => ev(id, { pubkey: S('0123456789'[i]) })));
+  assert.deepEqual(r.offers.map(o => o.id), [...SHUFFLED].sort());
+  const back = collect([...SHUFFLED].sort().reverse().map((id, i) => ev(id, { pubkey: S('0123456789'[i]) })));
+  assert.deepEqual(back.offers.map(o => o.id), [...SHUFFLED].sort());
 });
 
 // ---------- askaround: rankOffers ----------
@@ -135,6 +156,7 @@ test('rankOffers: topic lists accept exactly 20, refuse 21, and check every entr
   const t20 = Array.from({ length: 20 }, (_, i) => 't' + i);
   assert.equal(rankOffers([offer('a')], { wantTopics: t20 }).ok, true);
   assert.equal(rankOffers([offer('a')], { mustTopics: [] }).ok, true);
+  assert.equal(rankOffers([offer('a', { topics: t20 })], { mustTopics: t20 }).ok, true);
   err(rankOffers([offer('a')], { wantTopics: [...t20, 'x'] }), 'bad wantTopics');
   err(rankOffers([offer('a')], { mustTopics: [...t20, 'x'] }), 'bad mustTopics');
   err(rankOffers([offer('a')], { mustTopics: ['phonics', 'Bad'] }), 'bad mustTopics');
@@ -142,8 +164,10 @@ test('rankOffers: topic lists accept exactly 20, refuse 21, and check every entr
 });
 
 test('rankOffers: exclusions are listed in id order whatever the input order', () => {
-  const r = rankOffers([offer('c', { currency: 'USD' }), offer('a', { currency: 'USD' }), offer('b', { currency: 'USD' })], { currency: 'EUR' });
-  assert.deepEqual(r.excluded, [{ id: 'a', reason: 'currency' }, { id: 'b', reason: 'currency' }, { id: 'c', reason: 'currency' }]);
+  for (const order of [SHUFFLED, [...SHUFFLED].sort().reverse()]) {
+    const r = rankOffers(order.map(id => offer(id, { currency: 'USD' })), { currency: 'EUR' });
+    assert.deepEqual(r.excluded, [...SHUFFLED].sort().map(id => ({ id, reason: 'currency' })));
+  }
 });
 
 test('rankOffers: isSuppressed sees a copy of the whole offer', () => {
@@ -228,4 +252,47 @@ test('checkOffer: among equally specific decisions made at the same time, the la
   const r = checkOffer(m, { id: 'o1', seller: A, category: 'books', topics: [] }, 200);
   assert.equal(r.decision, 'd5');
   assert.equal(r.verdict, 'no');
+});
+
+// ---------- refusal messages ----------
+// Found by the TS mutation run (22 Nov 2026): these refusals were tested only as ok:false, so each message could be
+// blanked without a test failing. The message is what a caller gets back, so it is pinned exactly.
+
+test('collectOffers and rankOffers: each refusal carries its own message', () => {
+  const opts = { now: NOW, verify };
+  err(collectOffers({ ...REQ, id: 5 }, [], opts), 'id not string');
+  err(collectOffers({ ...REQ, pubkey: 5 }, [], opts), 'pubkey not string');
+  err(collectOffers({ ...REQ, created_at: -1 }, [], opts), 'bad created_at');
+  err(collectOffers({ ...REQ, tags: [] }, [], opts), 'bad category tag');
+  err(collectOffers(REQ, [], 'x'), 'bad options');
+  err(collectOffers(REQ, [], { verify }), 'bad now');
+  err(rankOffers([], 'x'), 'bad limits');
+  err(rankOffers([], {}, 'x'), 'bad options');
+});
+
+test('recordDecision, liftDecision, checkOffer: each refusal carries its own message', () => {
+  err(rd(base({ colour: 'red' })), 'unexpected key: colour');
+  err(liftDecision(createMemory(), 'd9', 1), 'decision not found: d9');
+  err(liftDecision(rec(createMemory(), base({ at: 100 })), 'd1', 99), 'at must be >= decision.at');
+  const m = createMemory(), o = { id: 'o1', seller: A, category: 'books', topics: [] };
+  err(checkOffer(m, { ...o, id: 5 }, 1), 'offer.id must be a string');
+  err(checkOffer(m, { ...o, seller: 5 }, 1), 'offer.seller must be a string');
+  err(checkOffer(m, { ...o, topics: [1] }, 1), 'offer.topics must be an array of strings');
+  err(checkOffer(m, o, -1), 'at must be a safe integer >= 0');
+});
+
+test('checkOffer: a topic decision naming more topics beats one naming fewer, even if older', () => {
+  // Found by the TS mutation run (22 Nov 2026): the topic count tie-break could be dropped without a test failing.
+  let m = createMemory();
+  m = rec(m, { verdict: 'yes', scope: { level: 'topic', category: 'books', topics: ['phonics', 'age-5'] }, at: 100 });
+  m = rec(m, { verdict: 'no', scope: { level: 'topic', category: 'books', topics: ['phonics'] }, at: 200 });
+  const r = checkOffer(m, { id: 'o1', seller: A, category: 'books', topics: ['phonics', 'age-5'] }, 300);
+  assert.equal(r.decision, 'd1');
+  assert.equal(r.verdict, 'yes');
+  // and recorded the other way round, so both sides of the comparison are read
+  m = createMemory();
+  m = rec(m, { verdict: 'no', scope: { level: 'topic', category: 'books', topics: ['phonics'] }, at: 100 });
+  m = rec(m, { verdict: 'yes', scope: { level: 'topic', category: 'books', topics: ['phonics', 'age-5'] }, at: 100 });
+  const r2 = checkOffer(m, { id: 'o1', seller: A, category: 'books', topics: ['phonics', 'age-5'] }, 300);
+  assert.equal(r2.decision, 'd2');
 });

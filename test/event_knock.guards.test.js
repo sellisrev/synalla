@@ -175,3 +175,11 @@ test('isKnock: true only for a valid signed event of the knock kind', () => {
   assert.equal(isKnock(signRaw({ kind: KNOCK_KIND })), true);
   assert.equal(isKnock({ ...k, content: k.content + ' ' }), false);
 });
+
+// Found by the TS mutation run (22 Nov 2026): the default note and the problem separator were not pinned.
+test('createKnock: a missing note is sent as an empty note; all problems are listed, joined by "; "', () => {
+  const k = createKnock(sk, { category: 'question', fields: { topic: 'x' } }, { createdAt: T0 });
+  assert.equal(JSON.parse(k.content).note, '');
+  assert.throws(() => createKnock(sk, { category: 'question', fields: { topic: 'x' }, note: 'mail a@b.example or call +33 6 12 34 56 78' }, { createdAt: T0 }),
+    { message: 'knock refused before sending: contains an email address; contains a phone number' });
+});

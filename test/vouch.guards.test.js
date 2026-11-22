@@ -130,6 +130,20 @@ test('add: latest wins; on equal time the higher id wins, whatever the arrival o
   for (const order of [[x, y], [y, x]]) assert.equal(new VouchGraph().addAll(order).edges().length, 1);
 });
 
+test('add: an older event never replaces a newer one, even with a higher id', () => {
+  // The id only breaks ties at equal time. Found by the TS mutation run (22 Nov 2026): the test above killed the
+  // "id decides at any time" mutant only when random ids happened to fall the right way.
+  const a = person(), b = person();
+  const u = createUnvouch(a.sk, b.pk, { createdAt: T0 + 1 });
+  let v;
+  for (let i = 0; i < 200; i++) {
+    v = createVouch(a.sk, b.pk, { createdAt: T0, scope: `s${i}` });
+    if (v.id > u.id) break;
+  }
+  assert.ok(v.id > u.id, 'test setup: need the older vouch to have the higher id');
+  for (const order of [[v, u], [u, v]]) assert.equal(new VouchGraph().addAll(order).edges().length, 0);
+});
+
 // ---- removals, strikes, suspensions ---------------------------------------------------------------------------------
 
 test('removeMember: the earliest removal time is kept', () => {
@@ -264,4 +278,10 @@ test('activeEdges: a vouch inside any one of several suspension windows is suspe
   g.removeMember(bad1.pk, T0);
   g.removeMember(bad2.pk, T0 + 1000);
   assert.deepEqual(g.activeEdges().map(e => e.subject), []);
+});
+
+test('createUnvouch: without a reason the content is empty', () => {
+  // Found by the TS mutation run (22 Nov 2026): the default reason was not pinned.
+  const a = person(), b = person();
+  assert.equal(createUnvouch(a.sk, b.pk, { createdAt: T0 }).content, '');
 });
