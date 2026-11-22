@@ -41,4 +41,4 @@ This code is a reference for the rules, tested on synthetic data. It is not read
 | Derived offers are only as true as their source | The signer vouches for the conversion, not for the employer |
 
 ## Event kinds
-The kinds in `src/kinds.ts` are provisional and not registered with the Nostr NIPs. Nothing in this repository publishes to public relays.
+The kinds in `src/kinds.ts` (3850-3860) are final but not registered with the Nostr NIPs, so another app could still pick the same numbers. Nothing in this repository publishes to public relays.

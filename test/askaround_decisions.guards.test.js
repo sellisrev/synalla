@@ -66,11 +66,11 @@ test('buildRequest: a zero budget is never looked for in the text', () => {
 
 // ---------- askaround: collectOffers ----------
 
-const REQ = { id: 'req1', pubkey: S('f'), kind: 7800, created_at: 5000, tags: [['category', 'books']], content: '{}', sig: 'x' };
+const REQ = { id: 'req1', pubkey: S('f'), kind: 3860, created_at: 5000, tags: [['category', 'books']], content: '{}', sig: 'x' };
 const NOW = 5000 + DAY;
 const body = (o = {}) => ({ type: 'sale', title: 'Phonics set', category: 'books/children', topics: ['phonics'], price: 20, currency: 'EUR', ...o });
 const ev = (id, o = {}, b = {}) => {
-  const e = { id, pubkey: S('a'), kind: 7797, created_at: 6000, tags: [['e', 'req1']], content: JSON.stringify(body(b)), ...o };
+  const e = { id, pubkey: S('a'), kind: 3857, created_at: 6000, tags: [['e', 'req1']], content: JSON.stringify(body(b)), ...o };
   e.sig = 'ok:' + id;
   return e;
 };
