@@ -10,7 +10,7 @@ type Result<T extends object> = ({ ok: true } & T) | { ok: false; errors: string
 export interface Need {
   category: string; topics: string[]; at: number; region?: string; days?: number; note?: string; private?: string[]; budget?: number;
 }
-export interface RequestTemplate { kind: 3860; created_at: number; tags: string[][]; content: string }
+export interface RequestTemplate { kind: 8446; created_at: number; tags: string[][]; content: string }
 export interface AskRequest { id: string; pubkey: string; kind: number; created_at: number; tags: string[][]; content?: string; sig?: string }
 export interface Offer {
   id: string; seller: string; created_at: number; type: 'sale' | 'service' | 'job' | 'tender'; title: string; category: string;
@@ -68,12 +68,12 @@ export function buildRequest(need: unknown): Result<{ template: RequestTemplate 
   if (region !== null) tags.push(['g', region]);
   tags.push(['expiration', String(need.at + days * 86400)]);
   const content = JSON.stringify({ v: 1, category: need.category, topics, region, note });
-  return { ok: true, template: { kind: 3860, created_at: need.at, tags, content } };
+  return { ok: true, template: { kind: 8446, created_at: need.at, tags, content } };
 }
 
 export function collectOffers(request: unknown, events: unknown, options: unknown): Result<{ offers: Offer[]; rejected: Rejected[] }> {
   if (!isPlain(request)) return { ok: false, errors: ['bad request'] };
-  if (request.kind !== 3860) return { ok: false, errors: ['wrong kind'] };
+  if (request.kind !== 8446) return { ok: false, errors: ['wrong kind'] };
   if (!isStr(request.id)) return { ok: false, errors: ['id not string'] };
   if (!isStr(request.pubkey)) return { ok: false, errors: ['pubkey not string'] };
   if (!isTime(request.created_at)) return { ok: false, errors: ['bad created_at'] };
@@ -97,7 +97,7 @@ export function collectOffers(request: unknown, events: unknown, options: unknow
     } else {
       reject(i, ev, 'bad_signature'); continue;
     }
-    if (ev.kind !== 3857) {
+    if (ev.kind !== 8443) {
       reject(i, ev, 'wrong_kind'); continue;
     }
     if (!Array.isArray(ev.tags) || !ev.tags.every((t: unknown) => Array.isArray(t) && t.every(isStr))

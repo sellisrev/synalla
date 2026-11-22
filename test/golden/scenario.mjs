@@ -322,11 +322,11 @@ export async function run(lib) {
       if (rnd() < 0.3) body.url = maybeBad(0.2, ['https://shop.example/1'], ['http://x']);
       const tags = [['e', maybeBad(0.05, [req.id], ['other'])]];
       if (rnd() < 0.3) tags.push(['expiration', String(maybeBad(0.4, [T0 + 86400 * 30], [T0 + 10, 'soon']))]);
-      const e = L.signEvent({ kind: maybeBad(0.03, [3857], [1]), created_at: T0 + maybeBad(0.05, [0, 60, 120, 120, 180], [-10, 2000]), tags,
+      const e = L.signEvent({ kind: maybeBad(0.03, [8443], [1]), created_at: T0 + maybeBad(0.05, [0, 60, 120, 120, 180], [-10, 2000]), tags,
         content: rnd() < 0.03 ? 'not json' : JSON.stringify(body) }, s.sk);
       askEvents.push(rnd() < 0.03 ? { ...e, sig: '0'.repeat(128) } : e);
     }
-    askEvents.push(L.signEvent({ kind: 3857, created_at: T0, tags: [['e', req.id]], content: '{}' }, owner.sk));
+    askEvents.push(L.signEvent({ kind: 8443, created_at: T0, tags: [['e', req.id]], content: '{}' }, owner.sk));
     askEvents.push(askEvents[3], 'junk');
     const col = live('collectOffers', () => L.collectOffers(req, askEvents, { now: T0 + 600, verify: L.verifyEvent }));
     call('collectOffers bad', () => [L.collectOffers(null, [], {}), L.collectOffers({ ...req, kind: 1 }, [], { now: 1, verify: L.verifyEvent }), L.collectOffers(req, null, { now: 1, verify: L.verifyEvent }), L.collectOffers(req, [], { now: 1 })]);

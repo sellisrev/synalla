@@ -12,15 +12,15 @@ import { buildRequest, collectOffers } from '../src/askaround.js';
 
 test('every Synalla kind has its final number', () => {
   assert.deepEqual({ ...KIND }, {
-    INVITE: 3850, REDEEM: 3851, VOUCH: 3852, UNVOUCH: 3853, QUESTION: 3854, RECORD: 3855,
-    RELEASE: 3856, OFFER: 3857, ACK: 3858, KNOCK: 3859, REQUEST: 3860,
+    INVITE: 8436, REDEEM: 8437, VOUCH: 8438, UNVOUCH: 8439, QUESTION: 8440, RECORD: 8441,
+    RELEASE: 8442, OFFER: 8443, ACK: 8444, KNOCK: 8445, REQUEST: 8446,
   });
 });
 
-test('kinds are distinct, regular (stored by relays) and inside the reserved block 3850-3861', () => {
+test('kinds are distinct, regular (stored by relays) and inside the reserved block 8436-8447', () => {
   const v = Object.values(KIND);
   assert.equal(new Set(v).size, v.length);
-  for (const k of v) assert.ok(Number.isInteger(k) && k >= 3850 && k <= 3861, String(k));
+  for (const k of v) assert.ok(Number.isInteger(k) && k >= 8436 && k <= 8447, String(k));
 });
 
 test('askaround uses the same numbers as kinds.ts (it may not import them)', () => {

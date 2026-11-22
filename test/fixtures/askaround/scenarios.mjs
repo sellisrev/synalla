@@ -33,7 +33,7 @@ export function makeScenario(seed) {
   }
   // a request, replies, and rankings
   const reqCat = pick(['books', 'books/children', 'games']);
-  const request = { id: 'r' + seed, pubkey: ME, kind: 3860, created_at: 5000, tags: [['category', reqCat], ['t', 'x']], content: '{}', sig: 'x' };
+  const request = { id: 'r' + seed, pubkey: ME, kind: 8446, created_at: 5000, tags: [['category', reqCat], ['t', 'x']], content: '{}', sig: 'x' };
   const now = 5000 + 86400;
   const events = [];
   const n = 6 + Math.floor(r() * 12);
@@ -42,7 +42,7 @@ export function makeScenario(seed) {
     const body = { type: pick(['sale', 'service', 'sale', 'job']), title: 'Offer ' + i, category: cat, topics: some(TOPICS, 0, 4),
       price: pick([5, 12, 19.9, 30, 30, 45, 80]), currency: r() < 0.85 ? 'EUR' : 'USD' };
     if (r() < 0.4) body.url = 'https://shop.example/' + i;
-    const e = { id: 'e' + String(Math.floor(r() * 90) + 10) + i, pubkey: pick(SELLERS), kind: 3857,
+    const e = { id: 'e' + String(Math.floor(r() * 90) + 10) + i, pubkey: pick(SELLERS), kind: 8443,
       created_at: 5000 + Math.floor(r() * 4) * 3600, tags: [['e', request.id]], content: JSON.stringify(body) };
     if (r() < 0.25) e.tags.push(['expiration', String(pick([now - 1, now, now + 1, now + 86400]))]);
     const fault = r();

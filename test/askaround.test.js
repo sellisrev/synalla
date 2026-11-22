@@ -19,11 +19,11 @@ const failed = r => {
 };
 const S = c => c.repeat(64);
 const need = (o = {}) => ({ category: 'books/children', topics: ['reading-method', 'age-5'], at: 1000, ...o });
-const REQ = { id: 'req1', pubkey: S('f'), kind: 3860, created_at: 5000, tags: [['category', 'books'], ['t', 'x']], content: '{}', sig: 'x' };
+const REQ = { id: 'req1', pubkey: S('f'), kind: 8446, created_at: 5000, tags: [['category', 'books'], ['t', 'x']], content: '{}', sig: 'x' };
 const NOW = 5000 + DAY;
 const body = (o = {}) => ({ type: 'sale', title: 'Phonics set', category: 'books/children', topics: ['phonics'], price: 20, currency: 'EUR', ...o });
 const ev = (id, o = {}, b = {}) => {
-  const e = { id, pubkey: S('a'), kind: 3857, created_at: 6000, tags: [['e', 'req1']], content: JSON.stringify(body(b)), ...o };
+  const e = { id, pubkey: S('a'), kind: 8443, created_at: 6000, tags: [['e', 'req1']], content: JSON.stringify(body(b)), ...o };
   e.sig = 'ok:' + id;
   return e;
 };
@@ -35,7 +35,7 @@ test('exports exactly the three functions', () => {
 
 test('buildRequest: the spec example', () => {
   const r = buildRequest({ category: 'books/children', topics: ['reading-method', 'age-5', 'age-5'], region: 'FR', at: 1000, note: 'For a beginner reader', private: ['Lou'], budget: 30 });
-  assert.deepEqual(r, { ok: true, template: { kind: 3860, created_at: 1000,
+  assert.deepEqual(r, { ok: true, template: { kind: 8446, created_at: 1000,
     tags: [['category', 'books/children'], ['t', 'age-5'], ['t', 'reading-method'], ['g', 'FR'], ['expiration', '1210600']],
     content: '{"v":1,"category":"books/children","topics":["age-5","reading-method"],"region":"FR","note":"For a beginner reader"}' } });
   assert.equal(Object.getPrototypeOf(r.template), Object.prototype);
@@ -249,8 +249,8 @@ test('non-string values never throw and fail cleanly', () => {
   failed(buildRequest(need({ category: 5 })));
   failed(buildRequest(need({ topics: [['age-5']] })));
   failed(buildRequest(need({ region: ['FR'] })));
-  const req = { kind: 3860, id: 'r'.repeat(64), pubkey: S('a'), created_at: 0, tags: [['category', 'books']] };
-  const ev = { id: 'x', kind: 3857, pubkey: S('b'), created_at: 10, tags: [['e', req.id]],
+  const req = { kind: 8446, id: 'r'.repeat(64), pubkey: S('a'), created_at: 0, tags: [['category', 'books']] };
+  const ev = { id: 'x', kind: 8443, pubkey: S('b'), created_at: 10, tags: [['e', req.id]],
     content: JSON.stringify({ type: 'sale', title: 'T', category: ['books'], topics: [], price: 1, currency: 'EUR' }) };
   const r = collectOffers(req, [ev], { now: 100, verify: () => true });
   assert.equal(r.ok, true);
@@ -263,8 +263,8 @@ test('rankOffers treats an explicit undefined options like a missing one', () =>
 });
 
 test('a seller key named like an Object.prototype property is handled as any other', () => {
-  const req = { kind: 3860, id: 'r'.repeat(64), pubkey: S('a'), created_at: 0, tags: [['category', 'books']] };
-  const ev = { id: 'x', kind: 3857, pubkey: 'constructor', created_at: 10, tags: [['e', req.id]],
+  const req = { kind: 8446, id: 'r'.repeat(64), pubkey: S('a'), created_at: 0, tags: [['category', 'books']] };
+  const ev = { id: 'x', kind: 8443, pubkey: 'constructor', created_at: 10, tags: [['e', req.id]],
     content: JSON.stringify({ type: 'sale', title: 'T', category: 'books', topics: [], price: 1, currency: 'EUR' }) };
   const r = collectOffers(req, [ev], { now: 100, verify: () => true });
   assert.equal(r.ok, true);
