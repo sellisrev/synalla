@@ -108,7 +108,8 @@ public `waiting` list, and a group of exactly k must be published.
 
 ### circle.ts
 - L19 `Buffer.from(s, 'utf8')` → `''`: an empty encoding name defaults to UTF-8. Equivalent.
-- L44 `typeof p.c !== 'string'` → `false`: the hex regex rejects every non-string anyway. Equivalent.
+- L44 `typeof p.c !== 'string'` → `false`: the hex regex rejects every non-string anyway. Equivalent. The whole
+  condition → `false` is not: a malformed code would pass. Pinned 23 Nov (`survivors_2026-11-23.guards.test.js`).
 
 ### inbox.ts
 - L40 `e.id > best.id` → `>=`: distinct ids. Equivalent.
@@ -126,14 +127,13 @@ public `waiting` list, and a group of exactly k must be published.
 - L36 `p.length >= 1` → `true`: `split` never returns an empty array. Equivalent.
 - L56 email quantifiers, L58 phone-run optional parts: the patterns are unanchored and the digit count decides, so the
   mutants match the same texts. Equivalent.
-- L61 joining the request texts with `'\n'` → `''`: phone detection allows whitespace inside a run, so digits that
-  touch across fields are found either way; only a note ending in an email fragment followed by a category could
-  differ, and that note is already one an agent should not send. Accepted.
+- L61 joining the request texts with `'\n'` → `''`: not equivalent: a private term would match across two fields
+  (note "Gift ab" + category "books…" reads "abbooks"). Pinned 23 Nov (`survivors_2026-11-23.guards.test.js`).
 - L111 the `JSON.parse` catch body emptied: `content` stays undefined and the plain-object check right after refuses it
   with the same reason. Equivalent.
-- L184 and L228 id comparators (`<=`, the second branch, `true`/`false`): distinct ids and the comparator argument
-  above. (`rankOffers` callers could pass two offers with the same id; their relative order among the exclusions is
-  then input order, which no caller relies on.)
+- L184 and L228 id comparators: `<=` and the second branch are equivalent (distinct ids). `true`/`false` at L184 and
+  the reversed comparator at L228 are not: they change the order of offers and of exclusions. Pinned 23 Nov
+  (`survivors_2026-11-23.guards.test.js`).
 - L203 `wantTopics` initial value: replaced before use whenever it is given, and an unused placeholder topic scores
   nothing. Equivalent.
 - L251–252 the created_at and id tie-breaks of the ranking: the list is already in id order (L228) and the sort is
