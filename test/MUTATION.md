@@ -38,6 +38,9 @@ vouch 95.94, wants 97.69. Every one of the 114 survivors has an entry below (che
 This confirms the "Now" column, which was computed from per-mutant replays. (A run on 23 Nov is void: its 2,598
 timeouts came from leaking mutants and a loaded machine; see `tools/mutation-test.mjs`.)
 
+**entries.ts (W4 circle entries and asks), 24 Nov 2026:** first run 94.20% (16 survivors); guard tests killed 7, each
+checked by applying the mutant; the 9 left are accepted below.
+
 **gate.ts, 24 Nov 2026 (knock age window, pruning, snapshots):** the run on the changed file gave 95.12% (10
 survivors, all in the new code); guard tests in `gate_window.guards.test.js` then killed 8 of them, each checked by
 applying the mutant. The 2 left are accepted below.
@@ -187,4 +190,10 @@ public `waiting` list, and a group of exactly k must be published.
 ### gate.ts
 - L72 and L185 `#prunedDay = -1` → `+1`: the value only has to differ from every real day number; day 1 (2 January
   1970) is never a receive time. Equivalent.
+
+### entries.ts
+- L104, L112 `typeof content !== 'string'` → `false`, and L106, L114 the `catch` body emptied: a non-string or
+  unparseable content then fails JSON.parse or the shape check, and the function returns null either way. Equivalent.
+- L127 the id tie-break of `candidates` (five mutants): entry ids on one owner's list are distinct, and V8's sort
+  only asks whether the comparator is negative (see "Sort comparators" above). Equivalent.
 

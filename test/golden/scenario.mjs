@@ -361,6 +361,20 @@ export async function run(lib) {
     }
     call('succession bad', () => [() => L.succession('', [], view(T0)), () => L.succession(OLD, [null], view(T0)), () => L.succession(OLD, [], null)]
       .map(f => { try { f(); return 'no throw'; } catch (e) { return `${e.constructor.name}: ${e.message}`; } }));
+
+    // ---- entries (W4 circle entries and asks, added 24 Nov 2026) ----
+    for (const k of ['CIRCLE_V', 'ENTRY_TYPES', 'LIMITS']) call('const ' + k, () => L[k]);
+    const ent = (o = {}) => ({ v: 'circle/1', id: 'phonics-cards', type: 'lend', topic: 'children-books', tags: ['phonics', 'age-5'], text: 'I can lend our phonics cards.', expires: T0 + 100, ...o });
+    const ak = (o = {}) => ({ v: 'circle/1', type: 'lend', topic: 'children-books', tags: ['phonics'], at: T0, ...o });
+    call('entryProblems', () => [ent(), ent({ id: 'Bad Id', tags: ['a', 'a'] }), ent({ text: '' }), null].map(e => L.entryProblems(e, T0)));
+    call('askProblems', () => [ak(), ak({ note: 'x' }), ak({ tags: Array(9).fill('t') })].map(a => L.askProblems(a)));
+    call('entryText', () => L.entryText(ent()));
+    const ar = live('askRumor', () => L.askRumor(ak(), owner.pk));
+    const an = live('answerRumor', () => L.answerRumor(ar.id, ent(), friend.pk, T0));
+    call('answerAllowed', () => [L.answerAllowed(an, ar.id, [ent()]), L.answerAllowed({ ...an, content: an.content + ' ' }, ar.id, [ent()]),
+      L.answerAllowed({ ...an, tags: [['e', ar.id], ['p', owner.pk]] }, ar.id, [ent()])]);
+    call('readEntry readAsk', () => [L.readEntry(an.content, T0), L.readEntry(an.content, T0 + 100), L.readAsk(ar.content), L.readAsk('{')]);
+    call('candidates', () => L.candidates(ak({ tags: ['phonics', 'age-5'] }), [ent({ id: 'b', tags: ['phonics'] }), ent({ id: 'a' }), ent({ id: 'c', type: 'help' })], T0).map(e => e.id));
   });
   return out;
 }
