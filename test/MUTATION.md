@@ -38,6 +38,11 @@ vouch 95.94, wants 97.69. Every one of the 114 survivors has an entry below (che
 This confirms the "Now" column, which was computed from per-mutant replays. (A run on 23 Nov is void: its 2,598
 timeouts came from leaking mutants and a loaded machine; see `tools/mutation-test.mjs`.)
 
+**net/binding.ts and net/admission.ts (moved from the bridge, 24 Nov 2026):** first run 75.86% (binding 72.02%,
+admission 81.75%; 231 survivors). Their only tests here are the factory kits' recorded scenarios; the bridge's
+end-to-end tests cover them too but are not run by Stryker. Guard tests are owed before the next change to either
+file; until then this is their baseline.
+
 **didkey.ts (W4 Ed25519 and did:key without Dina), 24 Nov 2026:** first run 92.06% (10 survivors); guard tests killed
 6 (4 confirmed by applying the mutant, 2 were message-only variants of the same checks); 4 equivalent, below. Byte
 parity with Dina is a bridge test (`didkey_parity.test.ts`).
