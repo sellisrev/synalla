@@ -142,8 +142,10 @@ test('Gate: defaults are no contacts and no proofs', () => {
 test('Gate: without an explicit time, receive counts against today (seconds, not milliseconds)', () => {
   const g = new Gate({ owner: owner.pk, contacts: [contact.pk], graph: graph(Infinity), policy: { perSenderPerDay: { A: 1 } } });
   const nowS = Math.floor(Date.now() / 1000);
-  assert.equal(g.receive(knock(contact.sk, 'one')).action, 'inbox');
-  assert.equal(g.receive(knock(contact.sk, 'two'), nowS).action, 'drop', 'same day, same budget');
+  // Knocks dated now: since 24 Nov 2026 the gate refuses knocks dated more than 5 minutes ahead.
+  const fresh = note => createKnock(contact.sk, { category: 'question', fields: { topic: 'QA pay in Lyon' }, note }, { createdAt: nowS });
+  assert.equal(g.receive(fresh('one')).action, 'inbox');
+  assert.equal(g.receive(fresh('two'), nowS).action, 'drop', 'same day, same budget');
   assert.ok(Math.abs(g.log[0].at - nowS) <= 5, 'logged time is now, in seconds');
 });
 

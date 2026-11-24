@@ -24,6 +24,10 @@ const DAY = 86400;
 
 export interface GatePolicy extends TrustPolicy {
   maxEventBytes: number;
+  /** Knocks older than this (seconds) are refused, so seen ids older than it can be forgotten (pilot plan W3). */
+  maxAgeSeconds: number;
+  /** Knocks dated further ahead than this (seconds) are refused. */
+  maxFutureSeconds: number;
   perSenderPerDay: Record<Tier, number>;
   categories: KnockCategories;
 }
@@ -47,9 +51,14 @@ export interface GateLogEntry {
 export const DEFAULT_GATE_POLICY: Readonly<GatePolicy> = Object.freeze({
   ...DEFAULT_POLICY,
   maxEventBytes: 4096,
+  maxAgeSeconds: 10 * DAY, // the homes' replay window (pilot plan W3)
+  maxFutureSeconds: 300,
   perSenderPerDay: { A: 50, B: 3, C: 1, D: 0 },
   categories: DEFAULT_CATEGORIES,
 });
+
+/** What a gate keeps across restarts: seen knock ids with their date, and today's counters. */
+export interface GateSnapshot { version: 1; seen: [string, number][]; counts: [string, number][] }
 
 export class Gate {
   owner: string;
@@ -57,8 +66,10 @@ export class Gate {
   graph: Pick<VouchGraph, 'hops' | 'removed'> | null | undefined;
   proofsFor: (pubkey: string) => Proofs | null | undefined;
   policy: GatePolicy;
-  seen: Set<string>;
+  /** Seen knock ids and their created_at; ids older than the age window are forgotten. */
+  seen: Map<string, number>;
   counts: Map<string, number>;
+  #prunedDay = -1;
   log: GateLogEntry[];
 
   /** proofsFor returns proofs already verified by the home for a sender (none by default). */
@@ -75,7 +86,7 @@ export class Gate {
       perSenderPerDay: { ...DEFAULT_GATE_POLICY.perSenderPerDay, ...(policy.perSenderPerDay ?? {}) },
       categories: { ...DEFAULT_GATE_POLICY.categories, ...(policy.categories ?? {}) },
     };
-    this.seen = new Set();
+    this.seen = new Map();
     this.counts = new Map(); // `${day}|${sender}` -> n, and `${day}|tierC` -> n
     this.log = [];
   }
@@ -101,8 +112,11 @@ export class Gate {
     if (e.kind !== KNOCK_KIND) return drop([`kind ${e.kind} is not a knock`]);
     const to = tagValue(e, 'p');
     if (to && to !== this.owner) return drop(['addressed to someone else']);
+    if (e.created_at < now - this.policy.maxAgeSeconds) return drop(['too old']);
+    if (e.created_at > now + this.policy.maxFutureSeconds) return drop(['dated in the future']);
+    this.#prune(now);
     if (this.seen.has(e.id)) return drop(['duplicate']);
-    this.seen.add(e.id);
+    this.seen.set(e.id, e.created_at);
 
     const t = admissionTier({
       owner: this.owner, contacts: this.contacts, graph: this.graph, sender: e.pubkey,
@@ -142,5 +156,32 @@ export class Gate {
       },
       note: body.note ?? '',
     };
+  }
+
+  /** Once a day: forget ids too old to be accepted again, and counters from before yesterday (a clock that steps back a
+   *  day must not reset a sender's limit). */
+  #prune(now: number): void {
+    const day = Math.floor(now / DAY);
+    if (day === this.#prunedDay) return;
+    this.#prunedDay = day;
+    for (const [id, at] of this.seen) if (at < now - this.policy.maxAgeSeconds) this.seen.delete(id);
+    for (const k of this.counts.keys()) if (Number(k.slice(0, k.indexOf('|'))) < day - 1) this.counts.delete(k);
+  }
+
+  snapshot(): GateSnapshot {
+    return { version: 1, seen: [...this.seen], counts: [...this.counts] };
+  }
+
+  /** Load a snapshot taken by snapshot(); refuses anything else. */
+  restore(s: unknown): void {
+    const x = s as Partial<GateSnapshot> | null;
+    const pairs = (v: unknown, key: (k: unknown) => boolean) => Array.isArray(v)
+      && v.every(e => Array.isArray(e) && e.length === 2 && key(e[0]) && Number.isSafeInteger(e[1]));
+    if (!x || x.version !== 1 || !pairs(x.seen, k => typeof k === 'string') || !pairs(x.counts, k => typeof k === 'string' && /^\d+\|/.test(k as string))) {
+      throw new TypeError('not a gate snapshot');
+    }
+    this.seen = new Map(x.seen);
+    this.counts = new Map(x.counts);
+    this.#prunedDay = -1;
   }
 }

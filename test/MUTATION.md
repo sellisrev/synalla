@@ -38,6 +38,10 @@ vouch 95.94, wants 97.69. Every one of the 114 survivors has an entry below (che
 This confirms the "Now" column, which was computed from per-mutant replays. (A run on 23 Nov is void: its 2,598
 timeouts came from leaking mutants and a loaded machine; see `tools/mutation-test.mjs`.)
 
+**gate.ts, 24 Nov 2026 (knock age window, pruning, snapshots):** the run on the changed file gave 95.12% (10
+survivors, all in the new code); guard tests in `gate_window.guards.test.js` then killed 8 of them, each checked by
+applying the mutant. The 2 left are accepted below.
+
 **succession.ts (W2 recovery rule), 24 Nov 2026:** first run 85.71% (38 survivors: the property tests never produced a
 denial signed by another key, a citation of another claim's conflict, a rival claim below the threshold, duplicate
 claim ids, and never asserted the trust flag); guard tests added (`succession.guards.test.js`); second run **95.11%**;
@@ -179,4 +183,8 @@ public `waiting` list, and a group of exactly k must be published.
 - L160 `confirmed.length > 1` → `>= 1`: exactly one confirmation already returned on the line before. Equivalent.
 - L166 `settled.length > 1` → `false`: two settled claims are two candidates, so the `candidates.length > 1` check
   below returns disputed anyway. Equivalent.
+
+### gate.ts
+- L72 and L185 `#prunedDay = -1` → `+1`: the value only has to differ from every real day number; day 1 (2 January
+  1970) is never a receive time. Equivalent.
 
