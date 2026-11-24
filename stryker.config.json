@@ -10,8 +10,8 @@
     "!src/kinds.ts",
     "!src/result.ts"
   ],
-  "concurrency": 6,
-  "timeoutMS": 20000,
+  "concurrency": 2,
+  "timeoutMS": 60000,
   "reporters": [
     "clear-text",
     "json",
