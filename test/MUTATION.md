@@ -38,6 +38,10 @@ vouch 95.94, wants 97.69. Every one of the 114 survivors has an entry below (che
 This confirms the "Now" column, which was computed from per-mutant replays. (A run on 23 Nov is void: its 2,598
 timeouts came from leaking mutants and a loaded machine; see `tools/mutation-test.mjs`.)
 
+**didkey.ts (W4 Ed25519 and did:key without Dina), 24 Nov 2026:** first run 92.06% (10 survivors); guard tests killed
+6 (4 confirmed by applying the mutant, 2 were message-only variants of the same checks); 4 equivalent, below. Byte
+parity with Dina is a bridge test (`didkey_parity.test.ts`).
+
 **entries.ts (W4 circle entries and asks), 24 Nov 2026:** first run 94.20% (16 survivors); guard tests killed 7, each
 checked by applying the mutant; the 9 left are accepted below.
 
@@ -196,4 +200,11 @@ public `waiting` list, and a group of exactly k must be published.
   unparseable content then fails JSON.parse or the shape check, and the function returns null either way. Equivalent.
 - L127 the id tie-break of `candidates` (five mutants): entry ids on one owner's list are distinct, and V8's sort
   only asks whether the comparator is negative (see "Sort comparators" above). Equivalent.
+
+### didkey.ts
+- L15, L32 loop bounds `zeros < length` → `true` / `<=`: reading one past the end gives `undefined`, which is neither
+  `0` nor `'1'`, so the loop stops at the same place. Equivalent.
+- L16 initial digit list with a placeholder string: the string coerces to 0 in the arithmetic and maps to nothing in
+  the output, so every input gives the same text. Equivalent.
+- L63 the error text inside `edVerify`: the `try` returns false before any message is seen. Equivalent.
 

@@ -375,6 +375,15 @@ export async function run(lib) {
       L.answerAllowed({ ...an, tags: [['e', ar.id], ['p', owner.pk]] }, ar.id, [ent()])]);
     call('readEntry readAsk', () => [L.readEntry(an.content, T0), L.readEntry(an.content, T0 + 100), L.readAsk(ar.content), L.readAsk('{')]);
     call('candidates', () => L.candidates(ak({ tags: ['phonics', 'age-5'] }), [ent({ id: 'b', tags: ['phonics'] }), ent({ id: 'a' }), ent({ id: 'c', type: 'help' })], T0).map(e => e.id));
+    // ---- didkey (W4: Ed25519 and did:key without Dina, added 24 Nov 2026) ----
+    const edSk = Uint8Array.from(Buffer.from('9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60', 'hex'));
+    const edPk = live('edPublicKey', () => L.edPublicKey(edSk));
+    const edSig = live('edSign', () => L.edSign(edSk, new TextEncoder().encode('Synalla é ✓')));
+    call('edVerify', () => [L.edVerify(edPk, new TextEncoder().encode('Synalla é ✓'), edSig), L.edVerify(edPk, new Uint8Array([1]), edSig), L.edVerify(new Uint8Array(2), new Uint8Array(), edSig)]);
+    const did = live('didKey', () => L.didKey(edPk));
+    call('didKeyPublicKey', () => L.didKeyPublicKey(did));
+    call('didKeyPublicKey bad', () => L.didKeyPublicKey('did:web:x'));
+    call('base58', () => [L.base58encode(new Uint8Array([0, 0, 1, 255])), L.base58decode('2NEpo7TZRRrLZSi2U')]);
   });
   return out;
 }
