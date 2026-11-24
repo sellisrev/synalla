@@ -15,3 +15,4 @@ export * from './inbox.ts';
 export * from './decisions.ts';
 export * from './askaround.ts';
 export * from './wants.ts';
+export * from './succession.ts';

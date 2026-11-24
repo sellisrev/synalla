@@ -333,6 +333,34 @@ export async function run(lib) {
     for (const [i, [limits, options]] of [[{}, undefined], [{ budget: 30, currency: 'EUR', wantTopics: ['phonics', 'age-5'] }, { top: 3 }], [{ mustTopics: ['phonics'] }, { isSuppressed: o => o.price === 45 }],
       [{ budget: -1 }, undefined], [{}, { top: 0 }], [{}, { isSuppressed: 'x' }], [{ budget: 0 }, { top: 50, isSuppressed: null }]].entries())
       call(`rankOffers ${i}`, () => L.rankOffers(col?.offers ?? [], limits, options));
+
+    // ---- succession (W2 recovery, added 24 Nov 2026) ----
+    for (const k of ['ACCEPT_AT', 'SETTLE_AT', 'HOLD', 'CONTACT_MIN_AGE', 'CHANNELS']) call('const ' + k, () => L[k]);
+    const D = 86400, OLD = owner.pk, NEXT = human.pk, FAKE = stranger.pk;
+    const contacts = new Map([[friend.pk, T0 - 30 * D], [vouched.pk, T0 - 30 * D], [seller.pk, T0 - 30 * D], [convener.pk, T0 - 3 * D]]);
+    const claimR = { type: 'claim', id: 'R', old: OLD, next: NEXT, seenAt: T0 };
+    const claimF = { type: 'claim', id: 'F', old: OLD, next: FAKE, seenAt: T0 + 60 };
+    const att = (id, c, who, cites = [], channel = 'phone', at = T0 + 100) => ({ type: 'attest', id, claim: c, attester: who.pk, channel, seenAt: at, cites });
+    const deny = (id, c, at = T0 + 50) => ({ type: 'deny', id, claim: c, old: OLD, seenAt: at });
+    const view = (now, extra = {}) => ({ contacts, now, ...extra });
+    const cases = [
+      ['nothing', [], view(T0)],
+      ['bare claim', [claimR, att('a0', 'R', stranger)], view(T0)],
+      ['one attester', [claimR, att('a1', 'R', friend)], view(T0)],
+      ['too-new contact and bad channel', [claimR, att('a1', 'R', convener), att('a2', 'R', friend, [], 'email')], view(T0)],
+      ['accepted in hold', [claimR, att('a1', 'R', friend), att('a2', 'R', vouched, [], 'signal', T0 + 200)], view(T0 + 1000)],
+      ['accepted effective', [claimR, att('a1', 'R', friend), att('a2', 'R', vouched, [], 'signal', T0 + 200)], view(T0 + 4 * D)],
+      ['denied', [claimR, deny('d1', 'R'), att('a1', 'R', friend), att('a2', 'R', vouched)], view(T0 + D)],
+      ['settled', [claimR, deny('d1', 'R'), att('a1', 'R', friend, ['d1']), att('a2', 'R', vouched, ['d1']), att('a3', 'R', seller, ['d1'], 'in_person')], view(T0 + 5 * D)],
+      ['rivals', [claimR, claimF, att('a1', 'R', friend), att('a2', 'R', vouched), att('f1', 'F', seller), att('f2', 'F', convener)], view(T0 + D)],
+      ['owner confirmed', [claimR, claimF], view(T0 + D, { confirmed: new Map([['F', T0 + 70]]) })],
+    ];
+    for (const [name, st, v] of cases) {
+      call(`succession ${name}`, () => L.succession(OLD, st, v));
+      call(`succession ${name} reversed`, () => L.succession(OLD, [...st].reverse(), v));
+    }
+    call('succession bad', () => [() => L.succession('', [], view(T0)), () => L.succession(OLD, [null], view(T0)), () => L.succession(OLD, [], null)]
+      .map(f => { try { f(); return 'no throw'; } catch (e) { return `${e.constructor.name}: ${e.message}`; } }));
   });
   return out;
 }

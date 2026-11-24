@@ -38,6 +38,12 @@ vouch 95.94, wants 97.69. Every one of the 114 survivors has an entry below (che
 This confirms the "Now" column, which was computed from per-mutant replays. (A run on 23 Nov is void: its 2,598
 timeouts came from leaking mutants and a loaded machine; see `tools/mutation-test.mjs`.)
 
+**succession.ts (W2 recovery rule), 24 Nov 2026:** first run 85.71% (38 survivors: the property tests never produced a
+denial signed by another key, a citation of another claim's conflict, a rival claim below the threshold, duplicate
+claim ids, and never asserted the trust flag); guard tests added (`succession.guards.test.js`); second run **95.11%**;
+two more survivors then killed (own-claim citation, non-object statement), each checked by applying the mutant. The
+remaining 11 are accepted below.
+
 ## Two arguments used for many survivors
 
 - **Distinct ids.** Two different events (or offers, or decisions) never share an id, so `<` and `<=` on ids give the
@@ -160,3 +166,17 @@ public `waiting` list, and a group of exactly k must be published.
 - L180–181 `at` and id tie-breaks, L186 sorting a copy: memory changes only through `recordDecision` (appends with the
   next id) and `liftDecision` (keeps positions), so stored order is id order and the sort is stable; `matching` is a
   fresh array. Equivalent through the API.
+
+### succession.ts
+- L99 `st.seenAt < prev.seenAt` → `<=`: two sightings of one claim id at the same time carry the same claim. Equivalent.
+- L101 `s.type === 'deny'` → `true`: claims have no `claim` field and attestations no `old`, so the other two conditions
+  already keep only denials. Equivalent.
+- L110 `st.type !== 'attest'` → `false`: a claim has no `claim` field to look up, and a denial has no attester to be a
+  contact. Equivalent.
+- L117 the `cites ?? []` default → a placeholder id: no conflict ever has that id. Equivalent.
+- L132 the claim-order comparator (five mutants): claim ids are distinct, and V8's sort only asks whether the result is
+  negative (see "Sort comparators" above). Equivalent.
+- L160 `confirmed.length > 1` → `>= 1`: exactly one confirmation already returned on the line before. Equivalent.
+- L166 `settled.length > 1` → `false`: two settled claims are two candidates, so the `candidates.length > 1` check
+  below returns disputed anyway. Equivalent.
+

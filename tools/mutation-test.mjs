@@ -10,7 +10,7 @@ import { spawn, spawnSync } from 'node:child_process';
 
 const RUN_LIMIT_MS = Number(process.env.SYNALLA_MUTATION_RUN_LIMIT_MS || 45000);
 const env = { ...process.env, SYNALLA_MUTATION_RUN: '1' };
-const child = spawn(process.execPath, ['--max-old-space-size=2048', '--import', './tools/ts-resolve.mjs', '--test', '--test-isolation=none', '--test-timeout=20000', 'test/*.test.js'],
+const child = spawn(process.execPath, ['--title=synalla-mutation-suite', '--max-old-space-size=2048', '--import', './tools/ts-resolve.mjs', '--test', '--test-isolation=none', '--test-timeout=20000', 'test/*.test.js'],
   { stdio: 'inherit', env });
 
 function killTree() {
