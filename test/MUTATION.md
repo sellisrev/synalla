@@ -31,6 +31,13 @@ suite.
 
 Every remaining survivor is accepted below.
 
+**Full rerun, 24 Nov 2026** (concurrency 2, 60 s, the guarded runner of `tools/run-mutation.sh`): **96.82%**, 3,470
+killed, 114 survived, 0 timed out, 4 mutants not run (no coverage). Per module: askaround 97.22, circle 98.02,
+decisions 97.29, event 88.79, gate 100, inbox 98.90, knock 95.36, offers 96.09, pool 97.67, seal 95.96, trust 95.12,
+vouch 95.94, wants 97.69. Every one of the 114 survivors has an entry below (checked by script against the report).
+This confirms the "Now" column, which was computed from per-mutant replays. (A run on 23 Nov is void: its 2,598
+timeouts came from leaking mutants and a loaded machine; see `tools/mutation-test.mjs`.)
+
 ## Two arguments used for many survivors
 
 - **Distinct ids.** Two different events (or offers, or decisions) never share an id, so `<` and `<=` on ids give the
