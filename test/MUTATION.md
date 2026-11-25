@@ -40,8 +40,9 @@ timeouts came from leaking mutants and a loaded machine; see `tools/mutation-tes
 
 **net/binding.ts and net/admission.ts (moved from the bridge, 24 Nov 2026):** first run 75.86% (binding 72.02%,
 admission 81.75%; 231 survivors). Their only tests here are the factory kits' recorded scenarios; the bridge's
-end-to-end tests cover them too but are not run by Stryker. Guard tests are owed before the next change to either
-file; until then this is their baseline.
+end-to-end tests cover them too but are not run by Stryker. Guard tests (25 Nov, written by the local model in a
+sandbox, reviewed and adopted: `net_admission.guards.test.js`, `net_binding.guards.test.js`, 44 tests) raise it to
+92.58% (admission 95.24%, binding 90.85%; 71 survivors left, not yet sorted into equivalent and owed).
 
 **didkey.ts (W4 Ed25519 and did:key without Dina), 24 Nov 2026:** first run 92.06% (10 survivors); guard tests killed
 6 (4 confirmed by applying the mutant, 2 were message-only variants of the same checks); 4 equivalent, below. Byte
