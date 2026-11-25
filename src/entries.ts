@@ -116,14 +116,19 @@ export function readAsk(content: unknown): Ask | null {
 }
 
 /**
- * The owner's entries that could answer an ask, best first: same type and topic required; more shared tags first;
- * ties by id. Expired entries are left out. The host agent may then rank them; the owner picks.
+ * The owner's entries that could answer an ask, best first: same topic required, type only ranks; entries of the
+ * ask's type first, then more shared tags, ties by id. Expired entries are left out. The host agent may then rank
+ * them; the owner picks.
+ *
+ * Why topic only: as a description of a need the five types overlap (someone who needs baby gear may want it lent,
+ * given or recommended). On the synthetic circle (synalla-memory benchmark/circle, 25 Nov 2026) requiring the same
+ * type found 18-24% of planted needs; topic only found 98% at 70% need precision.
  */
 export function candidates(a: Ask, entries: readonly Entry[], now: number): Entry[] {
   const want = new Set(a.tags);
   return entries
-    .filter(e => e.type === a.type && e.topic === a.topic && e.expires > now)
-    .map(e => ({ e, shared: e.tags.filter(t => want.has(t)).length }))
-    .sort((x, y) => y.shared - x.shared || (x.e.id < y.e.id ? -1 : x.e.id > y.e.id ? 1 : 0))
+    .filter(e => e.topic === a.topic && e.expires > now)
+    .map(e => ({ e, same: e.type === a.type ? 1 : 0, shared: e.tags.filter(t => want.has(t)).length }))
+    .sort((x, y) => y.same - x.same || y.shared - x.shared || (x.e.id < y.e.id ? -1 : x.e.id > y.e.id ? 1 : 0))
     .map(x => x.e);
 }

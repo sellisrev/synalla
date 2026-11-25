@@ -102,6 +102,10 @@ A network built on several people's private facts is worth nothing to its first 
 | `src/wants.ts` | The want gate: act at score 0.9 or more, ask the owner from the floor (default 0.2), drop below; the floor rises when the lowest confirmations are mostly "no" and falls when the owner wanted something that was dropped |
 | `src/inbox.ts` | Signed inbox lists (kind 10050) and the sender's delivery plan |
 | `src/circle.ts` | Invite links for a convener's circle and progress cards to share |
+| `src/entries.ts` | Circle entries and structured asks (`circle/1`): an ask matches entries on the same topic, and the type only ranks them (types overlap as descriptions of a need); an answer must be byte-for-byte a stored entry |
+| `src/succession.ts` | Recovery by social attestation: successor claims, attestations, denials, the 72-hour hold, disputes |
+| `src/didkey.ts` | Ed25519 signing and `did:key` identifiers |
+| `src/net/binding.ts`, `src/net/admission.ts` | Binding between the Nostr key and the home's `did:key` (signed both ways), and tiered admission of incoming contacts |
 | `schemas/` | JSON Schemas for the objects above |
 
 Everything else in the tables above is design, not code yet.

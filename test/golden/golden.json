@@ -248,7 +248,7 @@
 {"name":"answerRumor","value":{"pubkey":"f66d02aa25809c7a8a77fd38cbb10ace6c0ac40aefccb19918d4ec07406ea93f","created_at":1800000000,"kind":8443,"tags":[["e","2ce4bc7583214bbbc94e5d81e9aa8cdf04103c8fc37e536475dc84ffd9614536"]],"content":"{\"v\":\"circle/1\",\"id\":\"phonics-cards\",\"type\":\"lend\",\"topic\":\"children-books\",\"tags\":[\"phonics\",\"age-5\"],\"text\":\"I can lend our phonics cards.\",\"expires\":1800000100}","id":"75631f218561f3bae41301b496ef29293eeb06c8f701d1b822aa96a3b5ca7764"}},
 {"name":"answerAllowed","value":[true,false,false]},
 {"name":"readEntry readAsk","value":[{"v":"circle/1","id":"phonics-cards","type":"lend","topic":"children-books","tags":["phonics","age-5"],"text":"I can lend our phonics cards.","expires":1800000100},null,{"v":"circle/1","type":"lend","topic":"children-books","tags":["phonics"],"at":1800000000},null]},
-{"name":"candidates","value":["a","b"]},
+{"name":"candidates","value":["a","b","c"]},
 {"name":"edPublicKey","value":{"$bytes":"d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a"}},
 {"name":"edSign","value":{"$bytes":"3322f89451c413cedd3ec8cd3236aed63287fa2a97132131aa2cccbf9886d8ceb5f91e39fdf43d82d45f8f4b9390d6c66e6d4abf613f13e41828bb1b992fdf0e"}},
 {"name":"edVerify","value":[true,false,false]},

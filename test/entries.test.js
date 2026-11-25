@@ -112,14 +112,20 @@ test('readEntry and readAsk accept only valid content', () => {
   assert.equal(readAsk(null), null);
 });
 
-test('candidates: same type and topic, unexpired, most shared tags first, ties by id', () => {
+test('candidates: same topic, unexpired; the ask\'s type first, then most shared tags, ties by id', () => {
   const es = [
     entry({ id: 'b', tags: ['phonics'] }), entry({ id: 'a', tags: ['phonics'] }), entry({ id: 'c', tags: ['phonics', 'age-5'] }),
-    entry({ id: 'd', tags: [] }), entry({ id: 'e', type: 'help' }), entry({ id: 'f', topic: 'other' }), entry({ id: 'g', expires: T }),
+    entry({ id: 'd', tags: [] }), entry({ id: 'e', type: 'help', tags: ['phonics', 'age-5'] }), entry({ id: 'f', topic: 'other' }),
+    entry({ id: 'g', expires: T }),
   ];
-  assert.deepEqual(candidates(ask({ tags: ['phonics', 'age-5'] }), es, T).map(e => e.id), ['c', 'a', 'b', 'd']);
-  assert.deepEqual(candidates(ask({ tags: [] }), es, T).map(e => e.id), ['a', 'b', 'c', 'd']);
-  assert.deepEqual(candidates(ask({ tags: [] }), es, T - 1).map(e => e.id), ['a', 'b', 'c', 'd', 'g']);
+  // another type on the same topic is still a candidate, after every entry of the ask's type, even with more shared tags
+  assert.deepEqual(candidates(ask({ tags: ['phonics', 'age-5'] }), es, T).map(e => e.id), ['c', 'a', 'b', 'd', 'e']);
+  assert.deepEqual(candidates(ask({ tags: [] }), es, T).map(e => e.id), ['a', 'b', 'c', 'd', 'e']);
+  assert.deepEqual(candidates(ask({ tags: [] }), es, T - 1).map(e => e.id), ['a', 'b', 'c', 'd', 'g', 'e']);
+  // another topic never matches, whatever the type and tags
+  assert.deepEqual(candidates(ask({ topic: 'other', tags: [] }), es, T).map(e => e.id), ['f']);
+  // the type ranks ahead of tags in both directions
+  assert.deepEqual(candidates(ask({ type: 'help', tags: [] }), es, T).map(e => e.id), ['e', 'a', 'b', 'c', 'd']);
 });
 
 test('guards found by mutation testing (24 Nov 2026)', () => {
